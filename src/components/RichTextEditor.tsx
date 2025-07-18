@@ -31,7 +31,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none p-3 min-h-[200px] dark:prose-invert text-gray-900 dark:text-gray-100',
+        class: 'prose prose-sm max-w-none focus:outline-none p-3 min-h-[500px] dark:prose-invert text-gray-900 dark:text-gray-100',
       },
     },
   });
@@ -61,7 +61,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
 
   if (!editor || isLoading) {
     return (
-      <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[250px] flex items-center justify-center">
+      <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[550px] flex items-center justify-center">
         <div className="text-gray-500 dark:text-gray-400">読み込み中...</div>
       </div>
     );

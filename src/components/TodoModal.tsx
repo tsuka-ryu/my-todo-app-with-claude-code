@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Todo, UpdateTodoRequest } from '@/lib/types';
 import RichTextEditor from './RichTextEditor';
 import TagSelector from './TagSelector';
-import { prepareContentForEditor } from '@/lib/markdown';
 
 interface TodoModalProps {
   todo: Todo | null;
@@ -23,14 +22,35 @@ export default function TodoModal({
   onDelete,
   allTags = [],
 }: TodoModalProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  // 常にWYSIWYG編集モードにするため、isEditingステートを削除
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [editPriority, setEditPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editDueDate, setEditDueDate] = useState('');
-  const [displayContent, setDisplayContent] = useState('');
+  // プレビュー用コンテンツステートを削除（常にWYSIWYG編集のため）
   const [showCopyFeedback, setShowCopyFeedback] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // 自動保存機能（debounce付き）
+  const autoSave = useCallback(async () => {
+    if (!todo) return;
+    
+    setIsSaving(true);
+    try {
+      onUpdate(todo.meta.id, {
+        title: editTitle,
+        content: editContent,
+        priority: editPriority,
+        tags: editTags,
+        dueDate: editDueDate || undefined,
+      });
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [todo, editTitle, editContent, editPriority, editTags, editDueDate, onUpdate]);
 
   useEffect(() => {
     if (todo) {
@@ -39,52 +59,23 @@ export default function TodoModal({
       setEditPriority(todo.meta.priority);
       setEditTags(todo.meta.tags);
       setEditDueDate(todo.meta.dueDate || '');
-      
-      // 表示用のHTMLコンテンツを準備
-      prepareContentForEditor(todo.content).then(setDisplayContent).catch(error => {
-        console.error('Content display preparation failed:', error);
-        setDisplayContent(todo.content);
-      });
     }
   }, [todo, todo?.meta.dueDate, todo?.meta.title, todo?.meta.priority, todo?.meta.tags, todo?.content]);
 
+  // debounce用のタイマー
+  useEffect(() => {
+    if (!todo) return;
+    
+    const timer = setTimeout(() => {
+      autoSave();
+    }, 1000); // 1秒後に自動保存
+
+    return () => clearTimeout(timer);
+  }, [autoSave, todo]);
+
   if (!isOpen || !todo) return null;
 
-  const resetEditState = () => {
-    if (todo) {
-      setEditTitle(todo.meta.title);
-      setEditContent(todo.content);
-      setEditPriority(todo.meta.priority);
-      setEditTags(todo.meta.tags);
-      setEditDueDate(todo.meta.dueDate || '');
-    }
-  };
-
-  const handleSave = async () => {
-    onUpdate(todo.meta.id, {
-      title: editTitle,
-      content: editContent,
-      priority: editPriority,
-      tags: editTags,
-      dueDate: editDueDate || undefined,
-    });
-    
-    // 表示用のHTMLコンテンツを先に準備してから詳細ビューに切り替え
-    try {
-      const updatedDisplayContent = await prepareContentForEditor(editContent);
-      setDisplayContent(updatedDisplayContent);
-    } catch (error) {
-      console.error('Content display preparation failed:', error);
-      setDisplayContent(editContent);
-    }
-    
-    setIsEditing(false);
-  };
-  
-  const handleCancel = () => {
-    setIsEditing(false);
-    resetEditState();
-  };
+  // resetEditState関数は自動保存機能により不要になったため削除
 
   const handleDelete = () => {
     if (confirm('このTODOを削除しますか？')) {
@@ -152,17 +143,7 @@ export default function TodoModal({
                   </div>
                 )}
               </div>
-              {!isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="text-gray-400 hover:text-blue-600 transition-colors"
-                  title="編集"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </button>
-              )}
+              {/* 常にWYSIWYG編集モードのため、編集/プレビュー切り替えボタンを削除 */}
               <button
                 onClick={handleDelete}
                 className="text-gray-400 hover:text-red-600 transition-colors"
@@ -212,91 +193,76 @@ export default function TodoModal({
             )}
           </div>
 
-          {/* コンテンツ */}
-          {isEditing ? (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  タイトル
+          {/* コンテンツ - 常にWYSIWYG編集モード */}
+          <div className="space-y-4 flex flex-col h-full">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                タイトル
+              </label>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                placeholder="TODOのタイトルを入力..."
+              />
+            </div>
+            
+            {/* コンパクトなメタ情報エリア */}
+            <div className="flex flex-wrap gap-2 items-end">
+              <div className="flex-shrink-0">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  優先度
+                </label>
+                <select
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(e.target.value as 'high' | 'medium' | 'low')}
+                  className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="low">低</option>
+                  <option value="medium">中</option>
+                  <option value="high">高</option>
+                </select>
+              </div>
+              <div className="flex-shrink-0">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  期限
                 </label>
                 <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="TODOのタイトルを入力..."
+                  type="date"
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  詳細内容
+              <div className="flex-1 min-w-0">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  タグ
                 </label>
-                <RichTextEditor
-                  content={editContent}
-                  onChange={setEditContent}
+                <TagSelector
+                  selectedTags={editTags}
+                  onChange={setEditTags}
+                  allTags={allTags}
+                  placeholder="タグを選択..."
                 />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    優先度
-                  </label>
-                  <select
-                    value={editPriority}
-                    onChange={(e) => setEditPriority(e.target.value as 'high' | 'medium' | 'low')}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value="low">低</option>
-                    <option value="medium">中</option>
-                    <option value="high">高</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    期限
-                  </label>
-                  <input
-                    type="date"
-                    value={editDueDate}
-                    onChange={(e) => setEditDueDate(e.target.value)}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    タグ
-                  </label>
-                  <TagSelector
-                    selectedTags={editTags}
-                    onChange={setEditTags}
-                    allTags={allTags}
-                    placeholder="タグを選択または作成..."
-                  />
-                </div>
               </div>
             </div>
-          ) : (
-            <div 
-              className="prose prose-sm max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: displayContent }}
-            />
-          )}
+            
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                詳細内容
+              </label>
+              <RichTextEditor
+                content={editContent}
+                onChange={setEditContent}
+              />
+            </div>
+          </div>
 
-          {/* アクションボタン */}
-          {isEditing && (
-            <div className="flex gap-2 mt-6 pt-4 border-t dark:border-gray-600">
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                保存
-              </button>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded hover:bg-gray-600 dark:hover:bg-gray-500"
-              >
-                キャンセル
-              </button>
+          {/* 自動保存インジケーター */}
+          {isSaving && (
+            <div className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+              保存中...
             </div>
           )}
           </div>

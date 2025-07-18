@@ -58,7 +58,7 @@ export default function TagSelector({
   return (
     <div ref={containerRef} className="relative">
       <div 
-        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded cursor-text min-h-[40px] flex flex-wrap gap-1 items-center bg-white dark:bg-gray-700"
+        className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded cursor-text min-h-[32px] flex flex-wrap gap-1 items-center bg-white dark:bg-gray-700"
         onClick={() => setIsOpen(true)}
       >
         {selectedTags.map(tag => (
@@ -85,7 +85,7 @@ export default function TagSelector({
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
           placeholder={selectedTags.length === 0 ? placeholder : ''}
-          className="flex-1 outline-none bg-transparent min-w-[100px] text-gray-900 dark:text-gray-100"
+          className="flex-1 outline-none bg-transparent min-w-[80px] text-sm text-gray-900 dark:text-gray-100"
         />
       </div>
 
