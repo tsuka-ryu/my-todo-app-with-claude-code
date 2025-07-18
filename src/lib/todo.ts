@@ -4,42 +4,40 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Todo, TodoMeta, CreateTodoRequest, UpdateTodoRequest } from './types';
 import { prepareContentForStorage } from './markdown';
 import { 
-  generateSlugFromTitle, 
-  validateSlug, 
-  normalizeSlug, 
-  generateUniqueSlugCandidates, 
-  generateFallbackSlug 
-} from './slug';
+  generateFilenameFromTitle, 
+  generateUniqueFilenameCandidates, 
+  generateFallbackFilename 
+} from './filename';
 
 const TODOS_DIR = path.join(process.cwd(), 'todos');
 
 /**
- * slugが既存のファイルと重複しないかチェック
+ * ファイル名が既存のファイルと重複しないかチェック
  */
-async function isSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+async function isFilenameAvailable(filename: string, excludeId?: string): Promise<boolean> {
   try {
     await ensureTodosDir();
     const files = await fs.readdir(TODOS_DIR);
-    const metaFiles = files.filter(f => f.endsWith('.meta.json'));
     
-    for (const file of metaFiles) {
-      try {
-        const metaPath = path.join(TODOS_DIR, file);
-        const content = await fs.readFile(metaPath, 'utf-8');
-        const meta = JSON.parse(content) as TodoMeta;
-        
-        // 除外IDが指定されている場合は、そのIDのTODOは除外
-        if (excludeId && meta.id === excludeId) {
-          continue;
+    // 同じファイル名のファイルが存在するかチェック
+    const metaFilename = `${filename}.meta.json`;
+    const mdFilename = `${filename}.md`;
+    
+    if (files.includes(metaFilename) || files.includes(mdFilename)) {
+      // 除外IDが指定されている場合は、そのIDのファイルかチェック
+      if (excludeId) {
+        try {
+          const metaPath = path.join(TODOS_DIR, metaFilename);
+          const content = await fs.readFile(metaPath, 'utf-8');
+          const meta = JSON.parse(content) as TodoMeta;
+          if (meta.id === excludeId) {
+            return true; // 同じTODOの更新なのでOK
+          }
+        } catch {
+          // ファイル読み込みエラーは無視
         }
-        
-        if (meta.slug === slug) {
-          return false;
-        }
-      } catch {
-        // ファイル読み込みエラーは無視
-        continue;
       }
+      return false;
     }
     
     return true;
@@ -49,42 +47,27 @@ async function isSlugAvailable(slug: string, excludeId?: string): Promise<boolea
 }
 
 /**
- * 利用可能なユニークなslugを生成
+ * 利用可能なユニークなファイル名を生成
  */
-async function generateUniqueSlug(title: string, preferredSlug?: string, excludeId?: string): Promise<string> {
-  let baseSlug: string;
-  
-  if (preferredSlug) {
-    // ユーザー指定のslugを正規化
-    baseSlug = normalizeSlug(preferredSlug);
-    
-    // バリデーション
-    const validation = validateSlug(baseSlug);
-    if (!validation.isValid) {
-      // バリデーションエラーの場合はタイトルから生成
-      baseSlug = generateSlugFromTitle(title);
-    }
-  } else {
-    // タイトルからslugを生成
-    baseSlug = generateSlugFromTitle(title);
-  }
+async function generateUniqueFilename(title: string, excludeId?: string): Promise<string> {
+  const baseFilename = generateFilenameFromTitle(title);
   
   // 空の場合はフォールバック
-  if (!baseSlug) {
-    baseSlug = generateFallbackSlug();
+  if (!baseFilename) {
+    return generateFallbackFilename();
   }
   
   // 重複チェックとユニーク化
-  const candidates = generateUniqueSlugCandidates(baseSlug);
+  const candidates = generateUniqueFilenameCandidates(baseFilename);
   
   for (const candidate of candidates) {
-    if (await isSlugAvailable(candidate, excludeId)) {
+    if (await isFilenameAvailable(candidate, excludeId)) {
       return candidate;
     }
   }
   
   // 全ての候補が使用済みの場合はタイムスタンプベースのフォールバック
-  return generateFallbackSlug();
+  return generateFallbackFilename();
 }
 
 export async function ensureTodosDir() {
@@ -98,46 +81,49 @@ export async function ensureTodosDir() {
 // マークダウンコンテンツからタイトルを抽出するヘルパー関数
 function extractTitleFromMarkdown(content: string): string {
   const lines = content.split('\n');
-  const titleLine = lines.find(line => line.startsWith('# '));
-  return titleLine ? titleLine.replace('# ', '').trim() : 'Untitled';
+  for (const line of lines) {
+    if (line.startsWith('# ')) {
+      return line.substring(2).trim();
+    }
+  }
+  return 'Untitled';
 }
 
-// マークダウンコンテンツからタイトル行を除去するヘルパー関数
+// マークダウンコンテンツからタイトル行を削除するヘルパー関数
 function removeTitleFromMarkdown(content: string): string {
   const lines = content.split('\n');
-  const titleIndex = lines.findIndex(line => line.startsWith('# '));
-  if (titleIndex === 0) {
-    // 最初の行がタイトルの場合、タイトル行と次の空行も削除
-    return lines.slice(titleIndex + 1).join('\n').replace(/^\n+/, '');
-  }
-  return content;
+  const filteredLines = lines.filter((line, index) => {
+    // 最初の # タイトルを削除
+    if (index === 0 && line.startsWith('# ')) {
+      return false;
+    }
+    return true;
+  });
+  return filteredLines.join('\n').trim();
 }
 
 export async function getAllTodos(): Promise<Todo[]> {
   await ensureTodosDir();
   
   const files = await fs.readdir(TODOS_DIR);
-  const metaFiles = files.filter(file => file.endsWith('.meta.json'));
+  const metaFiles = files.filter(f => f.endsWith('.meta.json'));
   
   const todos: Todo[] = [];
   
   for (const metaFile of metaFiles) {
     const id = metaFile.replace('.meta.json', '');
-    const mdFile = `${id}.md`;
+    const metaPath = path.join(TODOS_DIR, metaFile);
+    const mdPath = path.join(TODOS_DIR, `${id}.md`);
     
     try {
-      const metaPath = path.join(TODOS_DIR, metaFile);
-      const mdPath = path.join(TODOS_DIR, mdFile);
-      
       const [metaContent, mdContent] = await Promise.all([
         fs.readFile(metaPath, 'utf-8'),
-        fs.readFile(mdPath, 'utf-8')
+        fs.readFile(mdPath, 'utf-8').catch(() => '') // mdファイルがない場合は空文字列
       ]);
       
-      // eslint-disable-next-line prefer-const
-      let meta: TodoMeta = JSON.parse(metaContent);
+      const meta: TodoMeta = JSON.parse(metaContent);
       
-      // titleフィールドがない場合は、マークダウンから抽出して追加
+      // レガシー対応：titleフィールドがない場合は、マークダウンから抽出
       if (!meta.title) {
         meta.title = extractTitleFromMarkdown(mdContent);
         meta.updatedAt = new Date().toISOString();
@@ -163,8 +149,31 @@ export async function getAllTodos(): Promise<Todo[]> {
 
 export async function getTodoById(id: string): Promise<Todo | null> {
   try {
+    // IDベースでファイルを探す（旧形式）
     const metaPath = path.join(TODOS_DIR, `${id}.meta.json`);
     const mdPath = path.join(TODOS_DIR, `${id}.md`);
+    
+    const [metaContent, mdContent] = await Promise.all([
+      fs.readFile(metaPath, 'utf-8'),
+      fs.readFile(mdPath, 'utf-8')
+    ]);
+    
+    const meta: TodoMeta = JSON.parse(metaContent);
+    return { meta, content: mdContent };
+  } catch {
+    // IDで見つからない場合は、全ファイルをスキャンして探す
+    const todos = await getAllTodos();
+    return todos.find(todo => todo.meta.id === id) || null;
+  }
+}
+
+export async function getTodoByTitle(title: string): Promise<Todo | null> {
+  try {
+    await ensureTodosDir();
+    const filename = generateFilenameFromTitle(title);
+    
+    const metaPath = path.join(TODOS_DIR, `${filename}.meta.json`);
+    const mdPath = path.join(TODOS_DIR, `${filename}.md`);
     
     const [metaContent, mdContent] = await Promise.all([
       fs.readFile(metaPath, 'utf-8'),
@@ -178,42 +187,14 @@ export async function getTodoById(id: string): Promise<Todo | null> {
   }
 }
 
-export async function getTodoBySlug(slug: string): Promise<Todo | null> {
-  try {
-    await ensureTodosDir();
-    const files = await fs.readdir(TODOS_DIR);
-    const metaFiles = files.filter(f => f.endsWith('.meta.json'));
-    
-    for (const file of metaFiles) {
-      try {
-        const metaPath = path.join(TODOS_DIR, file);
-        const content = await fs.readFile(metaPath, 'utf-8');
-        const meta = JSON.parse(content) as TodoMeta;
-        
-        if (meta.slug === slug) {
-          const mdPath = path.join(TODOS_DIR, `${meta.id}.md`);
-          const mdContent = await fs.readFile(mdPath, 'utf-8');
-          return { meta, content: mdContent };
-        }
-      } catch {
-        continue;
-      }
-    }
-    
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
   await ensureTodosDir();
   
   const id = uuidv4();
   const now = new Date().toISOString();
   
-  // slugを生成
-  const slug = await generateUniqueSlug(request.title, request.slug);
+  // ファイル名を生成
+  const filename = await generateUniqueFilename(request.title);
   
   // 現在のセクションの最大order値を取得
   const todos = await getAllTodos();
@@ -222,7 +203,6 @@ export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
   
   const meta: TodoMeta = {
     id,
-    slug,
     title: request.title,
     createdAt: now,
     updatedAt: now,
@@ -234,8 +214,8 @@ export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
     dueDate: request.dueDate
   };
   
-  const metaPath = path.join(TODOS_DIR, `${id}.meta.json`);
-  const mdPath = path.join(TODOS_DIR, `${id}.md`);
+  const metaPath = path.join(TODOS_DIR, `${filename}.meta.json`);
+  const mdPath = path.join(TODOS_DIR, `${filename}.md`);
   
   // コンテンツをマークダウン形式で保存
   const markdownContent = prepareContentForStorage(request.content);
@@ -252,20 +232,17 @@ export async function updateTodo(id: string, request: UpdateTodoRequest): Promis
   const existingTodo = await getTodoById(id);
   if (!existingTodo) return null;
   
-  // slugの更新処理
-  let newSlug = existingTodo.meta.slug;
-  if (request.slug !== undefined) {
-    // ユーザーがslugを指定した場合
-    newSlug = await generateUniqueSlug(request.title || existingTodo.meta.title, request.slug, id);
-  } else if (request.title && request.title !== existingTodo.meta.title) {
-    // タイトルが変更された場合、slugを自動更新するかどうかは設計判断
-    // ここでは既存のslugを維持する（URLの安定性のため）
+  // タイトルが変更された場合、ファイル名も変更する必要がある
+  const titleChanged = request.title && request.title !== existingTodo.meta.title;
+  let newFilename: string | null = null;
+  
+  if (titleChanged) {
+    newFilename = await generateUniqueFilename(request.title!, id);
   }
   
   const updatedMeta: TodoMeta = {
     ...existingTodo.meta,
     ...request,
-    slug: newSlug,
     updatedAt: new Date().toISOString()
   };
   
@@ -274,19 +251,89 @@ export async function updateTodo(id: string, request: UpdateTodoRequest): Promis
   // コンテンツをマークダウン形式で保存
   const markdownContent = prepareContentForStorage(updatedContent);
   
-  const metaPath = path.join(TODOS_DIR, `${id}.meta.json`);
-  const mdPath = path.join(TODOS_DIR, `${id}.md`);
-  
-  await Promise.all([
-    fs.writeFile(metaPath, JSON.stringify(updatedMeta, null, 2)),
-    fs.writeFile(mdPath, markdownContent)
-  ]);
+  if (titleChanged && newFilename) {
+    // 古いファイルを探す
+    const files = await fs.readdir(TODOS_DIR);
+    let oldMetaFile = `${id}.meta.json`;
+    let oldMdFile = `${id}.md`;
+    
+    // IDベースのファイルが存在しない場合、タイトルベースで探す
+    if (!files.includes(oldMetaFile)) {
+      // 全ファイルをスキャンして該当するIDを持つファイルを探す
+      for (const file of files.filter(f => f.endsWith('.meta.json'))) {
+        try {
+          const metaPath = path.join(TODOS_DIR, file);
+          const content = await fs.readFile(metaPath, 'utf-8');
+          const meta = JSON.parse(content) as TodoMeta;
+          if (meta.id === id) {
+            oldMetaFile = file;
+            oldMdFile = file.replace('.meta.json', '.md');
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+    
+    // 新しいファイルパス
+    const newMetaPath = path.join(TODOS_DIR, `${newFilename}.meta.json`);
+    const newMdPath = path.join(TODOS_DIR, `${newFilename}.md`);
+    
+    // 古いファイルパス
+    const oldMetaPath = path.join(TODOS_DIR, oldMetaFile);
+    const oldMdPath = path.join(TODOS_DIR, oldMdFile);
+    
+    // 新しいファイルを作成
+    await Promise.all([
+      fs.writeFile(newMetaPath, JSON.stringify(updatedMeta, null, 2)),
+      fs.writeFile(newMdPath, markdownContent)
+    ]);
+    
+    // 古いファイルを削除
+    await Promise.all([
+      fs.unlink(oldMetaPath).catch(() => {}),
+      fs.unlink(oldMdPath).catch(() => {})
+    ]);
+  } else {
+    // タイトルが変更されていない場合は、既存のファイルを更新
+    const files = await fs.readdir(TODOS_DIR);
+    let metaFile = `${id}.meta.json`;
+    let mdFile = `${id}.md`;
+    
+    // IDベースのファイルが存在しない場合、該当ファイルを探す
+    if (!files.includes(metaFile)) {
+      for (const file of files.filter(f => f.endsWith('.meta.json'))) {
+        try {
+          const metaPath = path.join(TODOS_DIR, file);
+          const content = await fs.readFile(metaPath, 'utf-8');
+          const meta = JSON.parse(content) as TodoMeta;
+          if (meta.id === id) {
+            metaFile = file;
+            mdFile = file.replace('.meta.json', '.md');
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+    
+    const metaPath = path.join(TODOS_DIR, metaFile);
+    const mdPath = path.join(TODOS_DIR, mdFile);
+    
+    await Promise.all([
+      fs.writeFile(metaPath, JSON.stringify(updatedMeta, null, 2)),
+      fs.writeFile(mdPath, markdownContent)
+    ]);
+  }
   
   return { meta: updatedMeta, content: markdownContent };
 }
 
 export async function deleteTodo(id: string): Promise<boolean> {
   try {
+    // まずIDベースで削除を試みる
     const metaPath = path.join(TODOS_DIR, `${id}.meta.json`);
     const mdPath = path.join(TODOS_DIR, `${id}.md`);
     
@@ -297,58 +344,56 @@ export async function deleteTodo(id: string): Promise<boolean> {
     
     return true;
   } catch {
+    // IDベースで見つからない場合、全ファイルをスキャン
+    const files = await fs.readdir(TODOS_DIR);
+    
+    for (const file of files.filter(f => f.endsWith('.meta.json'))) {
+      try {
+        const metaPath = path.join(TODOS_DIR, file);
+        const content = await fs.readFile(metaPath, 'utf-8');
+        const meta = JSON.parse(content) as TodoMeta;
+        
+        if (meta.id === id) {
+          const mdFile = file.replace('.meta.json', '.md');
+          const mdPath = path.join(TODOS_DIR, mdFile);
+          
+          await Promise.all([
+            fs.unlink(metaPath),
+            fs.unlink(mdPath)
+          ]);
+          
+          return true;
+        }
+      } catch {
+        continue;
+      }
+    }
+    
     return false;
   }
 }
 
-export async function reorderTodos(
-  sourceIndex: number,
-  destinationIndex: number,
-  sourceSection: string,
-  destinationSection: string
-): Promise<Todo[]> {
+export async function reorderTodos(sourceId: string, destinationId: string | null, section: string): Promise<void> {
   const todos = await getAllTodos();
+  const sectionTodos = todos.filter(todo => todo.meta.section === section);
   
-  if (sourceSection === destinationSection) {
-    // 同じセクション内での並び替え
-    const sectionTodos = todos.filter(todo => todo.meta.section === sourceSection);
-    const [movedTodo] = sectionTodos.splice(sourceIndex, 1);
-    sectionTodos.splice(destinationIndex, 0, movedTodo);
-    
-    // order値を更新
-    for (let i = 0; i < sectionTodos.length; i++) {
-      sectionTodos[i].meta.order = i + 1;
-      sectionTodos[i].meta.updatedAt = new Date().toISOString();
-      
-      const metaPath = path.join(TODOS_DIR, `${sectionTodos[i].meta.id}.meta.json`);
-      await fs.writeFile(metaPath, JSON.stringify(sectionTodos[i].meta, null, 2));
-    }
-  } else {
-    // 異なるセクション間での移動
-    const sourceTodos = todos.filter(todo => todo.meta.section === sourceSection);
-    const destTodos = todos.filter(todo => todo.meta.section === destinationSection);
-    
-    const [movedTodo] = sourceTodos.splice(sourceIndex, 1);
-    movedTodo.meta.section = destinationSection as 'today' | 'week' | 'longterm';
-    destTodos.splice(destinationIndex, 0, movedTodo);
-    
-    // 両方のセクションのorder値を更新
-    for (let i = 0; i < sourceTodos.length; i++) {
-      sourceTodos[i].meta.order = i + 1;
-      sourceTodos[i].meta.updatedAt = new Date().toISOString();
-      
-      const metaPath = path.join(TODOS_DIR, `${sourceTodos[i].meta.id}.meta.json`);
-      await fs.writeFile(metaPath, JSON.stringify(sourceTodos[i].meta, null, 2));
-    }
-    
-    for (let i = 0; i < destTodos.length; i++) {
-      destTodos[i].meta.order = i + 1;
-      destTodos[i].meta.updatedAt = new Date().toISOString();
-      
-      const metaPath = path.join(TODOS_DIR, `${destTodos[i].meta.id}.meta.json`);
-      await fs.writeFile(metaPath, JSON.stringify(destTodos[i].meta, null, 2));
-    }
+  const sourceIndex = sectionTodos.findIndex(todo => todo.meta.id === sourceId);
+  if (sourceIndex === -1) return;
+  
+  const sourceTodo = sectionTodos[sourceIndex];
+  sectionTodos.splice(sourceIndex, 1);
+  
+  let destinationIndex = sectionTodos.length;
+  if (destinationId) {
+    destinationIndex = sectionTodos.findIndex(todo => todo.meta.id === destinationId);
+    if (destinationIndex === -1) destinationIndex = sectionTodos.length;
   }
   
-  return getAllTodos();
+  sectionTodos.splice(destinationIndex, 0, sourceTodo);
+  
+  // 順序を更新
+  for (let i = 0; i < sectionTodos.length; i++) {
+    const todo = sectionTodos[i];
+    await updateTodo(todo.meta.id, { order: i + 1 });
+  }
 }

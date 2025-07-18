@@ -31,7 +31,7 @@ export async function migrateExistingTodos(): Promise<void> {
         }
         
         // タイトルからslugを生成
-        let baseSlug = generateSlugFromTitle(meta.title);
+        const baseSlug = generateSlugFromTitle(meta.title);
         
         // 重複チェック
         let slug = baseSlug;

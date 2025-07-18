@@ -1,6 +1,5 @@
 export interface TodoMeta {
   id: string;
-  slug: string;
   title: string;
   createdAt: string;
   updatedAt: string;
@@ -19,7 +18,6 @@ export interface Todo {
 
 export interface CreateTodoRequest {
   title: string;
-  slug?: string;
   content: string;
   priority?: 'high' | 'medium' | 'low';
   tags?: string[];
@@ -29,7 +27,6 @@ export interface CreateTodoRequest {
 
 export interface UpdateTodoRequest {
   title?: string;
-  slug?: string;
   content?: string;
   completed?: boolean;
   priority?: 'high' | 'medium' | 'low';

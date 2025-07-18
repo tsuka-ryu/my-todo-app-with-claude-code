@@ -1,8 +1,7 @@
 {
   "id": "todo-002",
-  "slug": "weekly-project-meeting-preparation",
   "createdAt": "2025-07-18T09:30:00Z",
-  "updatedAt": "2025-07-18T05:25:56.757Z",
+  "updatedAt": "2025-07-18T09:52:16.098Z",
   "completed": false,
   "priority": "medium",
   "tags": [
@@ -11,5 +10,5 @@
   ],
   "order": 2,
   "section": "today",
-  "title": "来週のプロジェクトミーティング準備",
+  "title": "来週のプロジェクトミーティング準備"
 }

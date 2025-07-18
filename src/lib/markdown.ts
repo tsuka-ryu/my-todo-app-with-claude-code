@@ -1,7 +1,6 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkHtml from 'remark-html';
-import rehypeParse from 'rehype-parse';
 import TurndownService from 'turndown';
 
 /**

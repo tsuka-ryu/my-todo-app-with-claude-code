@@ -25,7 +25,6 @@ export default function TodoModal({
 }: TodoModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
-  const [editSlug, setEditSlug] = useState('');
   const [editContent, setEditContent] = useState('');
   const [editPriority, setEditPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [editTags, setEditTags] = useState<string[]>([]);
@@ -36,7 +35,6 @@ export default function TodoModal({
   useEffect(() => {
     if (todo) {
       setEditTitle(todo.meta.title);
-      setEditSlug(todo.meta.slug || '');
       setEditContent(todo.content);
       setEditPriority(todo.meta.priority);
       setEditTags(todo.meta.tags);
@@ -55,7 +53,6 @@ export default function TodoModal({
   const resetEditState = () => {
     if (todo) {
       setEditTitle(todo.meta.title);
-      setEditSlug(todo.meta.slug || '');
       setEditContent(todo.content);
       setEditPriority(todo.meta.priority);
       setEditTags(todo.meta.tags);
@@ -66,7 +63,6 @@ export default function TodoModal({
   const handleSave = () => {
     onUpdate(todo.meta.id, {
       title: editTitle,
-      slug: editSlug.trim() || undefined,
       content: editContent,
       priority: editPriority,
       tags: editTags,
@@ -220,21 +216,6 @@ export default function TodoModal({
                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="TODOのタイトルを入力..."
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  スラッグ（URL識別子）
-                </label>
-                <input
-                  type="text"
-                  value={editSlug}
-                  onChange={(e) => setEditSlug(e.target.value)}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="ファイル名として使用される識別子"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  英数字、日本語、ハイフン、アンダースコアが使用可能です。
-                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
