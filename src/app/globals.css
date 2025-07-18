@@ -29,6 +29,10 @@ body {
   color: #374151;
 }
 
+.dark .prose {
+  color: #ffffff;
+}
+
 .prose h1 {
   font-size: 1.5rem;
   font-weight: 600;
@@ -76,11 +80,25 @@ body {
 }
 
 .prose-invert {
-  color: #d1d5db;
+  color: #ffffff !important;
 }
 
 .prose-invert h1,
 .prose-invert h2,
-.prose-invert h3 {
-  color: #f9fafb;
+.prose-invert h3,
+.prose-invert p,
+.prose-invert li,
+.prose-invert strong,
+.prose-invert em {
+  color: #ffffff !important;
+}
+
+/* TipTap editor specific styles */
+.ProseMirror {
+  outline: none;
+  color: inherit;
+}
+
+.dark .ProseMirror {
+  color: #f3f4f6;
 }
