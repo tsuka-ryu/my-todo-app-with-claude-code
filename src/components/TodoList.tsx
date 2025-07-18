@@ -51,16 +51,16 @@ function SectionHeader({
       className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
         isDragActive 
           ? isOver 
-            ? 'bg-blue-200 border-2 border-blue-400' 
-            : 'bg-gray-200 border-2 border-dashed border-gray-400'
-          : 'bg-gray-100'
+            ? 'bg-blue-200 dark:bg-blue-800 border-2 border-blue-400 dark:border-blue-600' 
+            : 'bg-gray-200 dark:bg-gray-700 border-2 border-dashed border-gray-400 dark:border-gray-600'
+          : 'bg-gray-100 dark:bg-gray-800'
       }`}
     >
-      <h2 className="text-lg font-semibold text-gray-800">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
         {title} ({count})
       </h2>
       {isDragActive && (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 dark:text-gray-300">
           {isOver ? 'ここにドロップ' : 'ドロップ可能'}
         </div>
       )}
@@ -170,7 +170,7 @@ export default function TodoList({
                   />
                 ))}
                 {section.todos.length === 0 && (
-                  <p className="text-gray-500 text-center py-8">
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">
                     TODOがありません
                   </p>
                 )}

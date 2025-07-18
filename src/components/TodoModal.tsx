@@ -27,6 +27,7 @@ export default function TodoModal({
   const [editPriority, setEditPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editDueDate, setEditDueDate] = useState('');
+  const [showCopyFeedback, setShowCopyFeedback] = useState(false);
 
   useEffect(() => {
     if (todo) {
@@ -56,11 +57,21 @@ export default function TodoModal({
     }
   };
 
+  const handleCopyFilename = async () => {
+    try {
+      await navigator.clipboard.writeText(`${todo.meta.id}.md`);
+      setShowCopyFeedback(true);
+      setTimeout(() => setShowCopyFeedback(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy filename:', err);
+    }
+  };
+
 
   const priorityColors = {
-    high: 'bg-red-100 text-red-800',
-    medium: 'bg-yellow-100 text-yellow-800',
-    low: 'bg-green-100 text-green-800',
+    high: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
+    medium: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
+    low: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
   };
 
   const priorityLabels = { high: '高', medium: '中', low: '低' };
@@ -76,7 +87,7 @@ export default function TodoModal({
       />
       
       {/* サイドパネル */}
-      <div className={`fixed top-0 right-0 h-full w-[70vw] bg-white shadow-xl transform transition-all duration-700 ease-out z-50 ${
+      <div className={`fixed top-0 right-0 h-full w-[70vw] bg-white dark:bg-gray-800 shadow-xl transform transition-all duration-700 ease-out z-50 ${
         isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       }`}>
         <div className="h-full overflow-y-auto">
@@ -84,20 +95,27 @@ export default function TodoModal({
           {/* ヘッダー */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {todo.content.split('\n')[0].replace(/^#\s*/, '')}
               </h2>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigator.clipboard.writeText(`${todo.meta.id}.md`)}
-                className="text-gray-400 hover:text-green-600 transition-colors"
-                title="ファイル名をコピー"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={handleCopyFilename}
+                  className={`text-gray-400 hover:text-green-600 transition-colors ${showCopyFeedback ? 'text-green-600' : ''}`}
+                  title="ファイル名をコピー"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                {showCopyFeedback && (
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                    コピーしました
+                  </div>
+                )}
+              </div>
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
@@ -140,19 +158,19 @@ export default function TodoModal({
             {todo.meta.tags.map(tag => (
               <span
                 key={tag}
-                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full"
+                className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full"
               >
                 {tag}
               </span>
             ))}
-            <span className="px-2 py-1 text-xs text-gray-500">
+            <span className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400">
               作成: {new Date(todo.meta.createdAt).toLocaleDateString('ja-JP')}
             </span>
-            <span className="px-2 py-1 text-xs text-gray-500">
+            <span className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400">
               更新: {new Date(todo.meta.updatedAt).toLocaleDateString('ja-JP')}
             </span>
             {todo.meta.dueDate && (
-              <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
+              <span className="px-2 py-1 text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full">
                 期限: {new Date(todo.meta.dueDate).toLocaleDateString('ja-JP')}
               </span>
             )}
@@ -162,7 +180,7 @@ export default function TodoModal({
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   内容
                 </label>
                 <RichTextEditor
@@ -172,13 +190,13 @@ export default function TodoModal({
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     優先度
                   </label>
                   <select
                     value={editPriority}
                     onChange={(e) => setEditPriority(e.target.value as 'high' | 'medium' | 'low')}
-                    className="w-full p-2 border border-gray-300 rounded"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="low">低</option>
                     <option value="medium">中</option>
@@ -186,18 +204,18 @@ export default function TodoModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     期限
                   </label>
                   <input
                     type="date"
                     value={editDueDate}
                     onChange={(e) => setEditDueDate(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     タグ
                   </label>
                   <TagSelector
@@ -211,14 +229,14 @@ export default function TodoModal({
             </div>
           ) : (
             <div 
-              className="prose prose-sm max-w-none"
+              className="prose prose-sm max-w-none dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: todo.content }}
             />
           )}
 
           {/* アクションボタン */}
           {isEditing && (
-            <div className="flex gap-2 mt-6 pt-4 border-t">
+            <div className="flex gap-2 mt-6 pt-4 border-t dark:border-gray-600">
               <button
                 onClick={handleSave}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -227,7 +245,7 @@ export default function TodoModal({
               </button>
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded hover:bg-gray-600 dark:hover:bg-gray-500"
               >
                 キャンセル
               </button>

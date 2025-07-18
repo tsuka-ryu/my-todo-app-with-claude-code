@@ -52,7 +52,7 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors ${
+      className={`group flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
         todo.meta.completed ? 'opacity-60' : ''
       }`}
       onClick={onClick}
@@ -61,7 +61,7 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
       <div
         {...attributes}
         {...listeners}
-        className="cursor-move text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="cursor-move text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
         onClick={(e) => e.stopPropagation()}
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -72,7 +72,7 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
       {/* チェックボックス */}
       <button
         onClick={toggleCompleted}
-        className="flex-shrink-0 w-5 h-5 rounded border-2 border-gray-300 hover:border-blue-500 transition-colors flex items-center justify-center"
+        className="flex-shrink-0 w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 transition-colors flex items-center justify-center"
       >
         {todo.meta.completed && (
           <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -90,7 +90,7 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
       {/* タイトル */}
       <div className="flex-1 min-w-0">
         <div
-          className={`text-sm font-medium text-gray-900 truncate ${
+          className={`text-sm font-medium text-gray-900 dark:text-gray-100 truncate ${
             todo.meta.completed ? 'line-through' : ''
           }`}
         >
@@ -100,14 +100,14 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
 
       {/* タグ（最初の1つのみ表示） */}
       {todo.meta.tags.length > 0 && (
-        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+        <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
           {todo.meta.tags[0]}
           {todo.meta.tags.length > 1 && ` +${todo.meta.tags.length - 1}`}
         </span>
       )}
 
       {/* 期限日 */}
-      <span className="text-xs text-gray-500 hidden sm:block">
+      <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
         {todo.meta.dueDate ? 
           new Date(todo.meta.dueDate).toLocaleDateString('ja-JP', {
             month: 'short',
@@ -123,7 +123,7 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
       {/* 削除ボタン */}
       <button
         onClick={handleDelete}
-        className="p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path
