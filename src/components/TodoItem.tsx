@@ -45,8 +45,8 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
     low: 'bg-green-500',
   };
 
-  // タイトルを抽出（最初の行の#を除去）
-  const title = todo.content.split('\n')[0].replace(/^#\s*/, '').trim();
+  // メタデータからタイトルを取得
+  const title = todo.meta.title;
 
   return (
     <div

@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
   try {
     const body: CreateTodoRequest = await request.json();
     
-    if (!body.content || body.content.trim() === '') {
-      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
+    if (!body.title || body.title.trim() === '') {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
     
     const todo = await createTodo(body);

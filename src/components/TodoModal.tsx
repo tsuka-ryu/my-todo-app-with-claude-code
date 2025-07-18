@@ -23,6 +23,7 @@ export default function TodoModal({
   allTags = [],
 }: TodoModalProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [editPriority, setEditPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [editTags, setEditTags] = useState<string[]>([]);
@@ -31,23 +32,40 @@ export default function TodoModal({
 
   useEffect(() => {
     if (todo) {
+      setEditTitle(todo.meta.title);
       setEditContent(todo.content);
       setEditPriority(todo.meta.priority);
       setEditTags(todo.meta.tags);
       setEditDueDate(todo.meta.dueDate || '');
     }
-  }, [todo]);
+  }, [todo, todo?.meta.dueDate, todo?.meta.title, todo?.meta.priority, todo?.meta.tags, todo?.content]);
 
   if (!isOpen || !todo) return null;
 
+  const resetEditState = () => {
+    if (todo) {
+      setEditTitle(todo.meta.title);
+      setEditContent(todo.content);
+      setEditPriority(todo.meta.priority);
+      setEditTags(todo.meta.tags);
+      setEditDueDate(todo.meta.dueDate || '');
+    }
+  };
+
   const handleSave = () => {
     onUpdate(todo.meta.id, {
+      title: editTitle,
       content: editContent,
       priority: editPriority,
       tags: editTags,
       dueDate: editDueDate || undefined,
     });
     setIsEditing(false);
+  };
+  
+  const handleCancel = () => {
+    setIsEditing(false);
+    resetEditState();
   };
 
   const handleDelete = () => {
@@ -96,7 +114,7 @@ export default function TodoModal({
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                {todo.content.split('\n')[0].replace(/^#\s*/, '')}
+                {todo.meta.title}
               </h2>
             </div>
             <div className="flex items-center gap-2">
@@ -181,7 +199,19 @@ export default function TodoModal({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  内容
+                  タイトル
+                </label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder="TODOのタイトルを入力..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  詳細内容
                 </label>
                 <RichTextEditor
                   content={editContent}
@@ -244,7 +274,7 @@ export default function TodoModal({
                 保存
               </button>
               <button
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancel}
                 className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded hover:bg-gray-600 dark:hover:bg-gray-500"
               >
                 キャンセル

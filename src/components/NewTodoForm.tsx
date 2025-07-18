@@ -20,10 +20,10 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
   const [dueDate, setDueDate] = useState('');
 
   const handleSubmit = () => {
-    if (title.trim() || content.trim()) {
-      const finalContent = title.trim() ? `# ${title.trim()}\n\n${content.trim()}` : content.trim();
+    if (title.trim()) {
       onCreate({
-        content: finalContent,
+        title: title.trim(),
+        content: content.trim(),
         section,
         priority,
         tags,
@@ -133,7 +133,7 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!title.trim() && !content.trim()}
+            disabled={!title.trim()}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             作成

@@ -1,7 +1,7 @@
 {
   "id": "todo-008",
   "createdAt": "2025-07-18T14:00:00Z",
-  "updatedAt": "2025-07-18T02:27:11.704Z",
+  "updatedAt": "2025-07-18T03:42:40.242Z",
   "completed": false,
   "priority": "medium",
   "tags": [
@@ -9,5 +9,6 @@
     "technology"
   ],
   "order": 8,
-  "section": "longterm"
+  "section": "longterm",
+  "title": "技術調査"
 }

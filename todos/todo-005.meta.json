@@ -1,7 +1,7 @@
 {
   "id": "todo-005",
   "createdAt": "2025-07-18T11:30:00Z",
-  "updatedAt": "2025-07-18T02:42:02.885Z",
+  "updatedAt": "2025-07-18T04:11:49.374Z",
   "completed": false,
   "priority": "medium",
   "tags": [
@@ -9,5 +9,8 @@
     "review"
   ],
   "order": 1,
-  "section": "today"
+  "section": "today",
+  "content": "<h2># コードレビュー対応 プルリクエストのレビューコメントに対応し、コード品質を向上させる。</h2><p></p>",
+  "dueDate": "2025-07-24",
+  "title": "コードレビュー"
 }

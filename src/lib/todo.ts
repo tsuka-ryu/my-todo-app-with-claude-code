@@ -13,6 +13,24 @@ export async function ensureTodosDir() {
   }
 }
 
+// マークダウンコンテンツからタイトルを抽出するヘルパー関数
+function extractTitleFromMarkdown(content: string): string {
+  const lines = content.split('\n');
+  const titleLine = lines.find(line => line.startsWith('# '));
+  return titleLine ? titleLine.replace('# ', '').trim() : 'Untitled';
+}
+
+// マークダウンコンテンツからタイトル行を除去するヘルパー関数
+function removeTitleFromMarkdown(content: string): string {
+  const lines = content.split('\n');
+  const titleIndex = lines.findIndex(line => line.startsWith('# '));
+  if (titleIndex === 0) {
+    // 最初の行がタイトルの場合、タイトル行と次の空行も削除
+    return lines.slice(titleIndex + 1).join('\n').replace(/^\n+/, '');
+  }
+  return content;
+}
+
 export async function getAllTodos(): Promise<Todo[]> {
   await ensureTodosDir();
   
@@ -34,8 +52,25 @@ export async function getAllTodos(): Promise<Todo[]> {
         fs.readFile(mdPath, 'utf-8')
       ]);
       
-      const meta: TodoMeta = JSON.parse(metaContent);
-      todos.push({ meta, content: mdContent });
+      // eslint-disable-next-line prefer-const
+      let meta: TodoMeta = JSON.parse(metaContent);
+      
+      // titleフィールドがない場合は、マークダウンから抽出して追加
+      if (!meta.title) {
+        meta.title = extractTitleFromMarkdown(mdContent);
+        meta.updatedAt = new Date().toISOString();
+        
+        // メタデータファイルを更新
+        await fs.writeFile(metaPath, JSON.stringify(meta, null, 2));
+        
+        // マークダウンファイルからタイトル行を削除
+        const cleanContent = removeTitleFromMarkdown(mdContent);
+        await fs.writeFile(mdPath, cleanContent);
+        
+        todos.push({ meta, content: cleanContent });
+      } else {
+        todos.push({ meta, content: mdContent });
+      }
     } catch (error) {
       console.error(`Error reading todo ${id}:`, error);
     }
@@ -74,6 +109,7 @@ export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
   
   const meta: TodoMeta = {
     id,
+    title: request.title,
     createdAt: now,
     updatedAt: now,
     completed: false,

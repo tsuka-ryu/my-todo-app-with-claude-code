@@ -1,7 +1,7 @@
 {
   "id": "todo-001",
   "createdAt": "2025-07-18T10:00:00Z",
-  "updatedAt": "2025-07-18T02:34:09.711Z",
+  "updatedAt": "2025-07-18T03:42:40.234Z",
   "completed": false,
   "priority": "high",
   "tags": [
@@ -9,5 +9,6 @@
     "frontend"
   ],
   "order": 2,
-  "section": "week"
+  "section": "week",
+  "title": "バグ修正: ログイン画面のエラー処理"
 }

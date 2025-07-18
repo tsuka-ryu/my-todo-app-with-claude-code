@@ -1,7 +1,7 @@
 {
   "id": "todo-003",
   "createdAt": "2025-07-18T08:00:00Z",
-  "updatedAt": "2025-07-18T02:20:48.471Z",
+  "updatedAt": "2025-07-18T03:42:40.239Z",
   "completed": false,
   "priority": "low",
   "tags": [
@@ -9,5 +9,6 @@
     "personal"
   ],
   "order": 3,
-  "section": "longterm"
+  "section": "longterm",
+  "title": "新しいスキルの習得"
 }

@@ -1,7 +1,7 @@
 {
   "id": "todo-002",
   "createdAt": "2025-07-18T09:30:00Z",
-  "updatedAt": "2025-07-18T02:34:09.711Z",
+  "updatedAt": "2025-07-18T03:42:40.238Z",
   "completed": false,
   "priority": "medium",
   "tags": [
@@ -9,5 +9,6 @@
     "work"
   ],
   "order": 2,
-  "section": "today"
+  "section": "today",
+  "title": "来週のプロジェクトミーティング準備"
 }
