@@ -13,6 +13,7 @@ interface NewTodoFormProps {
 
 export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTodoFormProps) {
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [content, setContent] = useState('');
   const [section, setSection] = useState<'today' | 'week' | 'longterm'>('today');
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
@@ -23,6 +24,7 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
     if (title.trim()) {
       onCreate({
         title: title.trim(),
+        slug: slug.trim() || undefined,
         content: content.trim(),
         section,
         priority,
@@ -30,6 +32,7 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
         dueDate: dueDate || undefined,
       });
       setTitle('');
+      setSlug('');
       setContent('');
       setTags([]);
       setDueDate('');
@@ -54,6 +57,22 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             autoFocus
           />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            スラッグ（URL識別子）
+          </label>
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder="ファイル名として使用される識別子（空欄の場合は自動生成）"
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            英数字、日本語、ハイフン、アンダースコアが使用可能です。空欄の場合、タイトルから自動生成されます。
+          </p>
         </div>
         
         <div>

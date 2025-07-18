@@ -1,5 +1,6 @@
 {
   "id": "todo-002",
+  "slug": "weekly-project-meeting-preparation",
   "createdAt": "2025-07-18T09:30:00Z",
   "updatedAt": "2025-07-18T05:25:56.757Z",
   "completed": false,
@@ -11,5 +12,4 @@
   "order": 2,
   "section": "today",
   "title": "来週のプロジェクトミーティング準備",
-  "content": "来週月曜日のプロジェクトミーティングの準備を行う。\n\n## やること\n\n-   プレゼン資料の作成\n    \n-   進捗レポートの準備\n    \n-   質問事項のリストアップ\n    \n-   アジェンダの確認と準備\n    \n\n## 関係者\n\n-   田中さん（PM）\n    \n-   山田さん（エンジニア）\n    \n-   佐藤さん（デザイナー）"
 }

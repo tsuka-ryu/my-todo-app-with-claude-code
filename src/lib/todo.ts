@@ -3,8 +3,89 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import type { Todo, TodoMeta, CreateTodoRequest, UpdateTodoRequest } from './types';
 import { prepareContentForStorage } from './markdown';
+import { 
+  generateSlugFromTitle, 
+  validateSlug, 
+  normalizeSlug, 
+  generateUniqueSlugCandidates, 
+  generateFallbackSlug 
+} from './slug';
 
 const TODOS_DIR = path.join(process.cwd(), 'todos');
+
+/**
+ * slugが既存のファイルと重複しないかチェック
+ */
+async function isSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+  try {
+    await ensureTodosDir();
+    const files = await fs.readdir(TODOS_DIR);
+    const metaFiles = files.filter(f => f.endsWith('.meta.json'));
+    
+    for (const file of metaFiles) {
+      try {
+        const metaPath = path.join(TODOS_DIR, file);
+        const content = await fs.readFile(metaPath, 'utf-8');
+        const meta = JSON.parse(content) as TodoMeta;
+        
+        // 除外IDが指定されている場合は、そのIDのTODOは除外
+        if (excludeId && meta.id === excludeId) {
+          continue;
+        }
+        
+        if (meta.slug === slug) {
+          return false;
+        }
+      } catch {
+        // ファイル読み込みエラーは無視
+        continue;
+      }
+    }
+    
+    return true;
+  } catch {
+    return true; // エラーの場合は利用可能とみなす
+  }
+}
+
+/**
+ * 利用可能なユニークなslugを生成
+ */
+async function generateUniqueSlug(title: string, preferredSlug?: string, excludeId?: string): Promise<string> {
+  let baseSlug: string;
+  
+  if (preferredSlug) {
+    // ユーザー指定のslugを正規化
+    baseSlug = normalizeSlug(preferredSlug);
+    
+    // バリデーション
+    const validation = validateSlug(baseSlug);
+    if (!validation.isValid) {
+      // バリデーションエラーの場合はタイトルから生成
+      baseSlug = generateSlugFromTitle(title);
+    }
+  } else {
+    // タイトルからslugを生成
+    baseSlug = generateSlugFromTitle(title);
+  }
+  
+  // 空の場合はフォールバック
+  if (!baseSlug) {
+    baseSlug = generateFallbackSlug();
+  }
+  
+  // 重複チェックとユニーク化
+  const candidates = generateUniqueSlugCandidates(baseSlug);
+  
+  for (const candidate of candidates) {
+    if (await isSlugAvailable(candidate, excludeId)) {
+      return candidate;
+    }
+  }
+  
+  // 全ての候補が使用済みの場合はタイムスタンプベースのフォールバック
+  return generateFallbackSlug();
+}
 
 export async function ensureTodosDir() {
   try {
@@ -97,11 +178,42 @@ export async function getTodoById(id: string): Promise<Todo | null> {
   }
 }
 
+export async function getTodoBySlug(slug: string): Promise<Todo | null> {
+  try {
+    await ensureTodosDir();
+    const files = await fs.readdir(TODOS_DIR);
+    const metaFiles = files.filter(f => f.endsWith('.meta.json'));
+    
+    for (const file of metaFiles) {
+      try {
+        const metaPath = path.join(TODOS_DIR, file);
+        const content = await fs.readFile(metaPath, 'utf-8');
+        const meta = JSON.parse(content) as TodoMeta;
+        
+        if (meta.slug === slug) {
+          const mdPath = path.join(TODOS_DIR, `${meta.id}.md`);
+          const mdContent = await fs.readFile(mdPath, 'utf-8');
+          return { meta, content: mdContent };
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
   await ensureTodosDir();
   
   const id = uuidv4();
   const now = new Date().toISOString();
+  
+  // slugを生成
+  const slug = await generateUniqueSlug(request.title, request.slug);
   
   // 現在のセクションの最大order値を取得
   const todos = await getAllTodos();
@@ -110,6 +222,7 @@ export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
   
   const meta: TodoMeta = {
     id,
+    slug,
     title: request.title,
     createdAt: now,
     updatedAt: now,
@@ -117,7 +230,8 @@ export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
     priority: request.priority || 'medium',
     tags: request.tags || [],
     order: maxOrder + 1,
-    section: request.section || 'today'
+    section: request.section || 'today',
+    dueDate: request.dueDate
   };
   
   const metaPath = path.join(TODOS_DIR, `${id}.meta.json`);
@@ -138,9 +252,20 @@ export async function updateTodo(id: string, request: UpdateTodoRequest): Promis
   const existingTodo = await getTodoById(id);
   if (!existingTodo) return null;
   
+  // slugの更新処理
+  let newSlug = existingTodo.meta.slug;
+  if (request.slug !== undefined) {
+    // ユーザーがslugを指定した場合
+    newSlug = await generateUniqueSlug(request.title || existingTodo.meta.title, request.slug, id);
+  } else if (request.title && request.title !== existingTodo.meta.title) {
+    // タイトルが変更された場合、slugを自動更新するかどうかは設計判断
+    // ここでは既存のslugを維持する（URLの安定性のため）
+  }
+  
   const updatedMeta: TodoMeta = {
     ...existingTodo.meta,
     ...request,
+    slug: newSlug,
     updatedAt: new Date().toISOString()
   };
   
