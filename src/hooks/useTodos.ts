@@ -76,8 +76,40 @@ export function useTodos() {
     sourceSection: string,
     destinationSection: string
   ) => {
+    // 楽観的更新：UIを即座に更新
+    const optimisticUpdate = () => {
+      setTodos(prev => {
+        const newTodos = [...prev];
+        
+        // セクション別にフィルタリング
+        const sections = {
+          today: newTodos.filter(t => t.meta.section === 'today'),
+          week: newTodos.filter(t => t.meta.section === 'week'),
+          longterm: newTodos.filter(t => t.meta.section === 'longterm'),
+        };
+        
+        const sourceItems = sections[sourceSection as keyof typeof sections];
+        const targetItems = sections[destinationSection as keyof typeof sections];
+        
+        if (!sourceItems || sourceIndex < 0 || sourceIndex >= sourceItems.length) {
+          return prev;
+        }
+        
+        const [movedItem] = sourceItems.splice(sourceIndex, 1);
+        movedItem.meta.section = destinationSection;
+        
+        const finalDestIndex = Math.min(destinationIndex, targetItems.length);
+        targetItems.splice(finalDestIndex, 0, movedItem);
+        
+        return [...sections.today, ...sections.week, ...sections.longterm];
+      });
+    };
+    
+    // 楽観的更新を即座に実行
+    optimisticUpdate();
+    
     try {
-      const response = await fetch('/api/todos/reorder', {
+      await fetch('/api/todos/reorder', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -87,14 +119,13 @@ export function useTodos() {
           destinationSection,
         }),
       });
-      if (!response.ok) throw new Error('Failed to reorder todos');
-      const reorderedTodos = await response.json();
-      setTodos(reorderedTodos);
     } catch (err) {
+      // エラー時は元のデータを再取得
+      fetchTodos();
       setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     }
-  }, []);
+  }, [fetchTodos]);
 
   useEffect(() => {
     fetchTodos();

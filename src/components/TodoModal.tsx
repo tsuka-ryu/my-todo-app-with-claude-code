@@ -81,24 +81,41 @@ export default function TodoModal({
           {/* ヘッダー */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={todo.meta.completed}
-                onChange={toggleCompleted}
-                className="mt-1"
-              />
               <h2 className="text-xl font-semibold text-gray-900">
                 {todo.content.split('\n')[0].replace(/^#\s*/, '')}
               </h2>
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-gray-400 hover:text-blue-600 transition-colors"
+                  title="編集"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              )}
+              <button
+                onClick={handleDelete}
+                className="text-gray-400 hover:text-red-600 transition-colors"
+                title="削除"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                title="閉じる"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* メタ情報 */}
@@ -176,39 +193,22 @@ export default function TodoModal({
           )}
 
           {/* アクションボタン */}
-          <div className="flex justify-between mt-6 pt-4 border-t">
-            <div className="flex gap-2">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleSave}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    保存
-                  </button>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                  >
-                    キャンセル
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  編集
-                </button>
-              )}
+          {isEditing && (
+            <div className="flex gap-2 mt-6 pt-4 border-t">
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                保存
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                キャンセル
+              </button>
             </div>
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              削除
-            </button>
-          </div>
+          )}
           </div>
         </div>
       </div>

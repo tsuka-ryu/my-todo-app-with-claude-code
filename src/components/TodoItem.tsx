@@ -23,8 +23,8 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    transition: isDragging ? 'none' : transition,
+    opacity: isDragging ? 0 : 1,
   };
 
   const toggleCompleted = (e: React.MouseEvent) => {
