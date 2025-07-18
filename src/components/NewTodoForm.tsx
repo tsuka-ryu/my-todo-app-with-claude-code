@@ -2,29 +2,37 @@
 
 import { useState } from 'react';
 import type { CreateTodoRequest } from '@/lib/types';
+import RichTextEditor from './RichTextEditor';
+import TagSelector from './TagSelector';
 
 interface NewTodoFormProps {
   onCreate: (request: CreateTodoRequest) => void;
   onCancel: () => void;
+  allTags?: string[];
 }
 
-export default function NewTodoForm({ onCreate, onCancel }: NewTodoFormProps) {
+export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTodoFormProps) {
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [section, setSection] = useState<'today' | 'week' | 'longterm'>('today');
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
-  const [tags, setTags] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [dueDate, setDueDate] = useState('');
 
   const handleSubmit = () => {
-    if (content.trim()) {
-      const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    if (title.trim() || content.trim()) {
+      const finalContent = title.trim() ? `# ${title.trim()}\n\n${content.trim()}` : content.trim();
       onCreate({
-        content: content.trim(),
+        content: finalContent,
         section,
         priority,
-        tags: tagArray,
+        tags,
+        dueDate: dueDate || undefined,
       });
+      setTitle('');
       setContent('');
-      setTags('');
+      setTags([]);
+      setDueDate('');
       onCancel();
     }
   };
@@ -36,19 +44,29 @@ export default function NewTodoForm({ onCreate, onCancel }: NewTodoFormProps) {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            内容
+            タイトル
           </label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="TODOの内容を入力..."
-            className="w-full p-3 border border-gray-300 rounded-lg resize-none"
-            rows={4}
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="TODOのタイトルを入力..."
+            className="w-full p-3 border border-gray-300 rounded-lg"
             autoFocus
           />
         </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            詳細内容
+          </label>
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
+          />
+        </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               セクション
@@ -78,17 +96,30 @@ export default function NewTodoForm({ onCreate, onCancel }: NewTodoFormProps) {
               <option value="high">高</option>
             </select>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              期限
+            </label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+            />
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              タグ（カンマ区切り）
+              タグ
             </label>
-            <input
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="tag1, tag2, tag3"
-              className="w-full p-2 border border-gray-300 rounded-lg"
+            <TagSelector
+              selectedTags={tags}
+              onChange={setTags}
+              allTags={allTags}
+              placeholder="タグを選択または作成..."
             />
           </div>
         </div>
@@ -102,7 +133,7 @@ export default function NewTodoForm({ onCreate, onCancel }: NewTodoFormProps) {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!content.trim()}
+            disabled={!title.trim() && !content.trim()}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             作成

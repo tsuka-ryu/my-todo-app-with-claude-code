@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import type { Todo, UpdateTodoRequest } from '@/lib/types';
+import RichTextEditor from './RichTextEditor';
+import TagSelector from './TagSelector';
 
 interface TodoModalProps {
   todo: Todo | null;
@@ -9,6 +11,7 @@ interface TodoModalProps {
   onClose: () => void;
   onUpdate: (id: string, request: UpdateTodoRequest) => void;
   onDelete: (id: string) => void;
+  allTags?: string[];
 }
 
 export default function TodoModal({
@@ -17,28 +20,31 @@ export default function TodoModal({
   onClose,
   onUpdate,
   onDelete,
+  allTags = [],
 }: TodoModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editPriority, setEditPriority] = useState<'high' | 'medium' | 'low'>('medium');
-  const [editTags, setEditTags] = useState('');
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editDueDate, setEditDueDate] = useState('');
 
   useEffect(() => {
     if (todo) {
       setEditContent(todo.content);
       setEditPriority(todo.meta.priority);
-      setEditTags(todo.meta.tags.join(', '));
+      setEditTags(todo.meta.tags);
+      setEditDueDate(todo.meta.dueDate || '');
     }
   }, [todo]);
 
   if (!isOpen || !todo) return null;
 
   const handleSave = () => {
-    const tags = editTags.split(',').map(tag => tag.trim()).filter(tag => tag);
     onUpdate(todo.meta.id, {
       content: editContent,
       priority: editPriority,
-      tags,
+      tags: editTags,
+      dueDate: editDueDate || undefined,
     });
     setIsEditing(false);
   };
@@ -50,9 +56,6 @@ export default function TodoModal({
     }
   };
 
-  const toggleCompleted = () => {
-    onUpdate(todo.meta.id, { completed: !todo.meta.completed });
-  };
 
   const priorityColors = {
     high: 'bg-red-100 text-red-800',
@@ -86,6 +89,15 @@ export default function TodoModal({
               </h2>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigator.clipboard.writeText(`${todo.meta.id}.md`)}
+                className="text-gray-400 hover:text-green-600 transition-colors"
+                title="ファイル名をコピー"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
@@ -139,6 +151,11 @@ export default function TodoModal({
             <span className="px-2 py-1 text-xs text-gray-500">
               更新: {new Date(todo.meta.updatedAt).toLocaleDateString('ja-JP')}
             </span>
+            {todo.meta.dueDate && (
+              <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
+                期限: {new Date(todo.meta.dueDate).toLocaleDateString('ja-JP')}
+              </span>
+            )}
           </div>
 
           {/* コンテンツ */}
@@ -148,14 +165,12 @@ export default function TodoModal({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   内容
                 </label>
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg resize-none"
-                  rows={10}
+                <RichTextEditor
+                  content={editContent}
+                  onChange={setEditContent}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     優先度
@@ -172,24 +187,33 @@ export default function TodoModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    タグ（カンマ区切り）
+                    期限
                   </label>
                   <input
-                    type="text"
-                    value={editTags}
-                    onChange={(e) => setEditTags(e.target.value)}
+                    type="date"
+                    value={editDueDate}
+                    onChange={(e) => setEditDueDate(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="tag1, tag2, tag3"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    タグ
+                  </label>
+                  <TagSelector
+                    selectedTags={editTags}
+                    onChange={setEditTags}
+                    allTags={allTags}
+                    placeholder="タグを選択または作成..."
                   />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="prose prose-sm max-w-none">
-              <pre className="whitespace-pre-wrap font-sans text-gray-800">
-                {todo.content}
-              </pre>
-            </div>
+            <div 
+              className="prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: todo.content }}
+            />
           )}
 
           {/* アクションボタン */}

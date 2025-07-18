@@ -106,6 +106,7 @@ export default function Home() {
             <NewTodoForm 
               onCreate={createTodo}
               onCancel={() => setShowNewTodo(false)}
+              allTags={allTags}
             />
           )}
 
@@ -138,6 +139,7 @@ export default function Home() {
             onUpdate={updateTodo}
             onDelete={deleteTodo}
             onReorder={reorderTodos}
+            allTags={allTags}
           />
         </div>
       </div>

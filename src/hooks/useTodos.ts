@@ -96,7 +96,7 @@ export function useTodos() {
         }
         
         const [movedItem] = sourceItems.splice(sourceIndex, 1);
-        movedItem.meta.section = destinationSection;
+        movedItem.meta.section = destinationSection as 'today' | 'week' | 'longterm';
         
         const finalDestIndex = Math.min(destinationIndex, targetItems.length);
         targetItems.splice(finalDestIndex, 0, movedItem);

@@ -6,7 +6,6 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  DragOverEvent,
   closestCenter,
   useDroppable,
 } from '@dnd-kit/core';
@@ -28,6 +27,7 @@ interface TodoListProps {
     sourceSection: string,
     destinationSection: string
   ) => void;
+  allTags?: string[];
 }
 
 function SectionHeader({ 
@@ -73,6 +73,7 @@ export default function TodoList({
   onUpdate,
   onDelete,
   onReorder,
+  allTags = [],
 }: TodoListProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
@@ -196,6 +197,7 @@ export default function TodoList({
         onClose={handleModalClose}
         onUpdate={onUpdate}
         onDelete={onDelete}
+        allTags={allTags}
       />
     </DndContext>
   );

@@ -11,10 +11,13 @@ export function useSearch(todos: Todo[]) {
   const fuse = useMemo(() => {
     return new Fuse(todos, {
       keys: [
-        { name: 'content', weight: 0.7 },
-        { name: 'meta.tags', weight: 0.3 },
+        { name: 'content', weight: 0.8 },
+        { name: 'meta.tags', weight: 0.2 },
       ],
-      threshold: 0.3,
+      threshold: 0.4,
+      includeMatches: true,
+      minMatchCharLength: 2,
+      ignoreLocation: true,
     });
   }, [todos]);
 
