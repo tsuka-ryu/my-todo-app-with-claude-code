@@ -1,0 +1,10 @@
+{
+  "id": "todo-003",
+  "createdAt": "2025-07-18T08:00:00Z",
+  "updatedAt": "2025-07-18T08:00:00Z",
+  "completed": false,
+  "priority": "low",
+  "tags": ["learning", "personal"],
+  "order": 3,
+  "section": "longterm"
+}

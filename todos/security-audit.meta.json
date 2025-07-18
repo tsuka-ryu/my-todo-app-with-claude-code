@@ -1,0 +1,10 @@
+{
+  "id": "todo-007",
+  "createdAt": "2025-07-18T13:00:00Z",
+  "updatedAt": "2025-07-18T13:00:00Z",
+  "completed": false,
+  "priority": "high",
+  "tags": ["security", "audit"],
+  "order": 7,
+  "section": "week"
+}
