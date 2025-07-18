@@ -3,6 +3,7 @@ pre-commit:
   commands:
     markdownlint:
       glob: "*.md"
+      exclude: "node_modules/**/*"
       run: npx markdownlint {staged_files} --fix
       stage_fixed: true
     

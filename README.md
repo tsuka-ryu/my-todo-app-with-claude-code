@@ -23,7 +23,22 @@ npm install
 npm run dev
 ```
 
-4. ブラウザで [http://localhost:3000](http://localhost:3000) を開く
+4. ブラウザで [http://localhost:3333](http://localhost:3333) を開く
+
+## ポート設定
+
+デフォルトでポート3333を使用しています。変更したい場合は：
+
+- `.env.local`ファイルの`PORT`を変更
+- または環境変数で指定: `PORT=8080 npm run dev`
+
+## サンプルTODOの削除
+
+アプリケーションには初期状態でサンプルTODOが含まれています。これらを削除するには：
+
+```bash
+npm run clean:todos
+```
 
 ## AI開発について
 
