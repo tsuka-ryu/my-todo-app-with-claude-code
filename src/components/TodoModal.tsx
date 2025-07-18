@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { Todo, UpdateTodoRequest } from '@/lib/types';
 import RichTextEditor from './RichTextEditor';
 import TagSelector from './TagSelector';
+import { prepareContentForEditor } from '@/lib/markdown';
 
 interface TodoModalProps {
   todo: Todo | null;
@@ -28,6 +29,7 @@ export default function TodoModal({
   const [editPriority, setEditPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editDueDate, setEditDueDate] = useState('');
+  const [displayContent, setDisplayContent] = useState('');
   const [showCopyFeedback, setShowCopyFeedback] = useState(false);
 
   useEffect(() => {
@@ -37,6 +39,12 @@ export default function TodoModal({
       setEditPriority(todo.meta.priority);
       setEditTags(todo.meta.tags);
       setEditDueDate(todo.meta.dueDate || '');
+      
+      // 表示用のHTMLコンテンツを準備
+      prepareContentForEditor(todo.content).then(setDisplayContent).catch(error => {
+        console.error('Content display preparation failed:', error);
+        setDisplayContent(todo.content);
+      });
     }
   }, [todo, todo?.meta.dueDate, todo?.meta.title, todo?.meta.priority, todo?.meta.tags, todo?.content]);
 
@@ -260,7 +268,7 @@ export default function TodoModal({
           ) : (
             <div 
               className="prose prose-sm max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: todo.content }}
+              dangerouslySetInnerHTML={{ __html: displayContent }}
             />
           )}
 

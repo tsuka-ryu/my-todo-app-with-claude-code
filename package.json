@@ -19,6 +19,13 @@
     "next": "15.4.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "rehype-dom-stringify": "^4.0.2",
+    "rehype-parse": "^9.0.1",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1",
+    "remark-parse": "^11.0.0",
+    "turndown": "^7.2.0",
+    "unified": "^11.0.5",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

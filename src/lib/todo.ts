@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import type { Todo, TodoMeta, CreateTodoRequest, UpdateTodoRequest } from './types';
+import { prepareContentForStorage } from './markdown';
 
 const TODOS_DIR = path.join(process.cwd(), 'todos');
 
@@ -122,12 +123,15 @@ export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
   const metaPath = path.join(TODOS_DIR, `${id}.meta.json`);
   const mdPath = path.join(TODOS_DIR, `${id}.md`);
   
+  // コンテンツをマークダウン形式で保存
+  const markdownContent = prepareContentForStorage(request.content);
+  
   await Promise.all([
     fs.writeFile(metaPath, JSON.stringify(meta, null, 2)),
-    fs.writeFile(mdPath, request.content)
+    fs.writeFile(mdPath, markdownContent)
   ]);
   
-  return { meta, content: request.content };
+  return { meta, content: markdownContent };
 }
 
 export async function updateTodo(id: string, request: UpdateTodoRequest): Promise<Todo | null> {
@@ -142,15 +146,18 @@ export async function updateTodo(id: string, request: UpdateTodoRequest): Promis
   
   const updatedContent = request.content !== undefined ? request.content : existingTodo.content;
   
+  // コンテンツをマークダウン形式で保存
+  const markdownContent = prepareContentForStorage(updatedContent);
+  
   const metaPath = path.join(TODOS_DIR, `${id}.meta.json`);
   const mdPath = path.join(TODOS_DIR, `${id}.md`);
   
   await Promise.all([
     fs.writeFile(metaPath, JSON.stringify(updatedMeta, null, 2)),
-    fs.writeFile(mdPath, updatedContent)
+    fs.writeFile(mdPath, markdownContent)
   ]);
   
-  return { meta: updatedMeta, content: updatedContent };
+  return { meta: updatedMeta, content: markdownContent };
 }
 
 export async function deleteTodo(id: string): Promise<boolean> {

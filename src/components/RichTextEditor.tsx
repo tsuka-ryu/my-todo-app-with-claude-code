@@ -2,7 +2,8 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { prepareContentForEditor, prepareContentForStorage } from '@/lib/markdown';
 
 interface RichTextEditorProps {
   content: string;
@@ -10,6 +11,9 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+  const [editorContent, setEditorContent] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -18,10 +22,12 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
         },
       }),
     ],
-    content,
+    content: editorContent,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      const markdown = prepareContentForStorage(html);
+      onChange(markdown);
     },
     editorProps: {
       attributes: {
@@ -31,13 +37,34 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
   });
 
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
-    }
+    const loadContent = async () => {
+      setIsLoading(true);
+      try {
+        const htmlContent = await prepareContentForEditor(content);
+        setEditorContent(htmlContent);
+        if (editor && htmlContent !== editor.getHTML()) {
+          editor.commands.setContent(htmlContent);
+        }
+      } catch (error) {
+        console.error('Content conversion failed:', error);
+        setEditorContent(content);
+        if (editor) {
+          editor.commands.setContent(content);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadContent();
   }, [content, editor]);
 
-  if (!editor) {
-    return null;
+  if (!editor || isLoading) {
+    return (
+      <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[250px] flex items-center justify-center">
+        <div className="text-gray-500 dark:text-gray-400">読み込み中...</div>
+      </div>
+    );
   }
 
   return (
