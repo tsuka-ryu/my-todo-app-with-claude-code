@@ -7,10 +7,13 @@ import TurndownService from 'turndown';
  * マークダウンをHTMLに変換する
  */
 export async function markdownToHtml(markdown: string): Promise<string> {
+  // 改行をハードブレークに変換（2つのスペース + 改行）
+  const processedMarkdown = markdown.replace(/\n(?!\n)/g, '  \n');
+  
   const result = await unified()
     .use(remarkParse)
     .use(remarkHtml, { sanitize: false })
-    .process(markdown);
+    .process(processedMarkdown);
   
   return String(result);
 }
@@ -25,6 +28,21 @@ export function htmlToMarkdown(html: string): string {
       headingStyle: 'atx', // # 形式の見出し
       bulletListMarker: '-', // - でリスト
       codeBlockStyle: 'fenced', // ``` でコードブロック
+      br: '\n', // <br>タグを改行に変換
+    });
+    
+    // 改行を保持するためのカスタムルール
+    turndownService.addRule('lineBreak', {
+      filter: 'br',
+      replacement: () => '\n'
+    });
+    
+    // 段落内の改行を保持
+    turndownService.addRule('paragraph', {
+      filter: 'p',
+      replacement: (content) => {
+        return content.trim() + '\n\n';
+      }
     });
     
     return turndownService.turndown(html);

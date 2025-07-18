@@ -40,22 +40,22 @@ export function markdownInputHandler(view: EditorView, event: KeyboardEvent): bo
     const headingMatch = currentLineText.match(/^(#{1,6})\s*$/);
     if (headingMatch) {
       const level = Math.min(headingMatch[1].length, 6);
-      const from = $from.pos - headingMatch[0].length;
-      const to = $from.pos;
       
-      // 見出しに変換
-      const tr = state.tr.delete(from, to);
-      view.dispatch(tr);
-      
-      // 見出しコマンドを実行
-      setTimeout(() => {
-        const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
-        if (editor) {
-          editor.chain().focus().toggleHeading({ level }).run();
-        }
-      }, 0);
-      
-      return true;
+      // エディタコマンドを直接実行（カーソル位置を正確に保持）
+      const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
+      if (editor) {
+        // 見出しマークを削除してから見出しに変換
+        const from = $from.pos - headingMatch[0].length;
+        const to = $from.pos;
+        editor.chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .deleteSelection()
+          .toggleHeading({ level })
+          .run();
+        
+        return true;
+      }
     }
   }
 
@@ -63,22 +63,21 @@ export function markdownInputHandler(view: EditorView, event: KeyboardEvent): bo
   if (event.key === ' ') {
     const listMatch = currentLineText.match(/^[-*+]\s*$/);
     if (listMatch) {
-      const from = $from.pos - listMatch[0].length;
-      const to = $from.pos;
-      
-      // リストマーカーを削除
-      const tr = state.tr.delete(from, to);
-      view.dispatch(tr);
-      
-      // リストコマンドを実行
-      setTimeout(() => {
-        const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
-        if (editor) {
-          editor.chain().focus().toggleBulletList().run();
-        }
-      }, 0);
-      
-      return true;
+      // エディタコマンドを直接実行（カーソル位置を正確に保持）
+      const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
+      if (editor) {
+        // リストマークを削除してからリストに変換
+        const from = $from.pos - listMatch[0].length;
+        const to = $from.pos;
+        editor.chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .deleteSelection()
+          .toggleBulletList()
+          .run();
+        
+        return true;
+      }
     }
   }
 
@@ -86,22 +85,21 @@ export function markdownInputHandler(view: EditorView, event: KeyboardEvent): bo
   if (event.key === ' ') {
     const orderedListMatch = currentLineText.match(/^(\d+)\.\s*$/);
     if (orderedListMatch) {
-      const from = $from.pos - orderedListMatch[0].length;
-      const to = $from.pos;
-      
-      // リストマーカーを削除
-      const tr = state.tr.delete(from, to);
-      view.dispatch(tr);
-      
-      // 番号付きリストコマンドを実行
-      setTimeout(() => {
-        const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
-        if (editor) {
-          editor.chain().focus().toggleOrderedList().run();
-        }
-      }, 0);
-      
-      return true;
+      // エディタコマンドを直接実行（カーソル位置を正確に保持）
+      const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
+      if (editor) {
+        // 番号付きリストマークを削除してからリストに変換
+        const from = $from.pos - orderedListMatch[0].length;
+        const to = $from.pos;
+        editor.chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .deleteSelection()
+          .toggleOrderedList()
+          .run();
+        
+        return true;
+      }
     }
   }
 
@@ -110,24 +108,23 @@ export function markdownInputHandler(view: EditorView, event: KeyboardEvent): bo
     const beforeCursor = currentLineText.slice(0, -1);
     const boldMatch = beforeCursor.match(/\*\*([^*]+)\*$/);
     if (boldMatch) {
-      const from = $from.pos - boldMatch[0].length - 1;
-      const to = $from.pos;
-      
-      // マークダウン記法を削除
-      const tr = state.tr.delete(from, to).insertText(boldMatch[1]);
-      view.dispatch(tr);
-      
-      // 太字を適用
-      setTimeout(() => {
-        const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
-        if (editor) {
-          const startPos = from;
-          const endPos = from + boldMatch[1].length;
-          editor.chain().focus().setTextSelection({ from: startPos, to: endPos }).toggleBold().run();
-        }
-      }, 0);
-      
-      return true;
+      // エディタコマンドを直接実行（カーソル位置を正確に保持）
+      const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
+      if (editor) {
+        const from = $from.pos - boldMatch[0].length - 1;
+        const to = $from.pos;
+        
+        // マークダウン記法を削除してテキストを挿入後、太字適用
+        editor.chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .insertContent(boldMatch[1])
+          .setTextSelection({ from, to: from + boldMatch[1].length })
+          .toggleBold()
+          .run();
+        
+        return true;
+      }
     }
   }
 
@@ -136,24 +133,23 @@ export function markdownInputHandler(view: EditorView, event: KeyboardEvent): bo
     const beforeCursor = currentLineText.slice(0, -1);
     const italicMatch = beforeCursor.match(/\*([^*]+)$/);
     if (italicMatch) {
-      const from = $from.pos - italicMatch[0].length - 1;
-      const to = $from.pos;
-      
-      // マークダウン記法を削除
-      const tr = state.tr.delete(from, to).insertText(italicMatch[1]);
-      view.dispatch(tr);
-      
-      // 斜体を適用
-      setTimeout(() => {
-        const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
-        if (editor) {
-          const startPos = from;
-          const endPos = from + italicMatch[1].length;
-          editor.chain().focus().setTextSelection({ from: startPos, to: endPos }).toggleItalic().run();
-        }
-      }, 0);
-      
-      return true;
+      // エディタコマンドを直接実行（カーソル位置を正確に保持）
+      const editor = view.dom.closest('[data-tiptap-editor]')?.__tiptapEditor;
+      if (editor) {
+        const from = $from.pos - italicMatch[0].length - 1;
+        const to = $from.pos;
+        
+        // マークダウン記法を削除してテキストを挿入後、斜体適用
+        editor.chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .insertContent(italicMatch[1])
+          .setTextSelection({ from, to: from + italicMatch[1].length })
+          .toggleItalic()
+          .run();
+        
+        return true;
+      }
     }
   }
 

@@ -21,6 +21,12 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
         heading: {
           levels: [1, 2, 3],
         },
+        hardBreak: {
+          keepMarks: false,
+          HTMLAttributes: {
+            class: 'hard-break',
+          },
+        },
       }),
     ],
     content: editorContent,
@@ -34,7 +40,29 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
       attributes: {
         class: 'prose prose-sm max-w-none focus:outline-none p-3 min-h-[500px] dark:prose-invert text-gray-900 dark:text-gray-100',
       },
-      handleKeyDown: markdownInputHandler,
+      handleKeyDown: (view, event) => {
+        // 見出しから改行した時に通常の段落に戻る
+        if (event.key === 'Enter' && !event.shiftKey) {
+          const { state } = view;
+          const { selection } = state;
+          const { $from } = selection;
+          
+          // 現在が見出しかチェック
+          if ($from.parent.type.name === 'heading') {
+            // 見出し内でEnterを押したら、見出しを解除して通常の段落に
+            setTimeout(() => {
+              const editorElement = view.dom.closest('[data-tiptap-editor]') as HTMLElement & { __tiptapEditor?: typeof editor };
+              const editorInstance = editorElement?.__tiptapEditor;
+              if (editorInstance) {
+                editorInstance.chain().focus().setParagraph().run();
+              }
+            }, 0);
+          }
+        }
+        
+        // マークダウン記法の処理
+        return markdownInputHandler(view as Parameters<typeof markdownInputHandler>[0], event);
+      },
     },
   });
 
@@ -129,6 +157,15 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           H3
         </button>
         <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+        <button
+          onClick={() => editor.chain().focus().setParagraph().run()}
+          className={`p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 ${
+            editor.isActive('paragraph') ? 'bg-gray-300 dark:bg-gray-600' : ''
+          }`}
+          title="段落"
+        >
+          P
+        </button>
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 ${
