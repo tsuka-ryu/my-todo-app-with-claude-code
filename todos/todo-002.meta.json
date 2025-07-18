@@ -1,7 +1,7 @@
 {
   "id": "todo-002",
   "createdAt": "2025-07-18T09:30:00Z",
-  "updatedAt": "2025-07-18T02:23:20.231Z",
+  "updatedAt": "2025-07-18T02:23:27.491Z",
   "completed": false,
   "priority": "medium",
   "tags": [
@@ -9,5 +9,5 @@
     "work"
   ],
   "order": 2,
-  "section": "week"
+  "section": "today"
 }

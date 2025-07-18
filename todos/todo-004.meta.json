@@ -1,13 +1,13 @@
 {
   "id": "todo-004",
   "createdAt": "2025-07-18T11:00:00Z",
-  "updatedAt": "2025-07-18T02:23:20.231Z",
+  "updatedAt": "2025-07-18T02:23:22.483Z",
   "completed": false,
   "priority": "high",
   "tags": [
     "performance",
     "backend"
   ],
-  "order": 4,
+  "order": 3,
   "section": "week"
 }
