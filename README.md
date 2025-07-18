@@ -7,23 +7,31 @@
 1. リポジトリをクローン
 
 ```bash
-npx degit tsukaryu/my-todo-list my-todo-app
+npx degit git@github.com:tsuka-ryu/my-todo-app-with-claude-code.git my-todo-app
 cd my-todo-app
 ```
 
-2. 依存関係をインストール
+2. Gitリポジトリを初期化
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+```
+
+3. 依存関係をインストール
 
 ```bash
 npm install
 ```
 
-3. 開発サーバーを起動
+4. 開発サーバーを起動
 
 ```bash
 npm run dev
 ```
 
-4. ブラウザで [http://localhost:3333](http://localhost:3333) を開く
+5. ブラウザで [http://localhost:3333](http://localhost:3333) を開く
 
 ## ポート設定
 
