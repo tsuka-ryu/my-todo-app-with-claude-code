@@ -60,7 +60,7 @@ export default function TodoModal({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     onUpdate(todo.meta.id, {
       title: editTitle,
       content: editContent,
@@ -68,6 +68,16 @@ export default function TodoModal({
       tags: editTags,
       dueDate: editDueDate || undefined,
     });
+    
+    // 表示用のHTMLコンテンツを先に準備してから詳細ビューに切り替え
+    try {
+      const updatedDisplayContent = await prepareContentForEditor(editContent);
+      setDisplayContent(updatedDisplayContent);
+    } catch (error) {
+      console.error('Content display preparation failed:', error);
+      setDisplayContent(editContent);
+    }
+    
     setIsEditing(false);
   };
   
