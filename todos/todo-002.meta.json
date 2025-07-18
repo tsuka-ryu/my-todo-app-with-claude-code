@@ -1,10 +1,13 @@
 {
   "id": "todo-002",
   "createdAt": "2025-07-18T09:30:00Z",
-  "updatedAt": "2025-07-18T09:30:00Z",
+  "updatedAt": "2025-07-18T02:23:20.231Z",
   "completed": false,
   "priority": "medium",
-  "tags": ["meeting", "work"],
+  "tags": [
+    "meeting",
+    "work"
+  ],
   "order": 2,
   "section": "week"
 }

@@ -1,0 +1,13 @@
+{
+  "id": "todo-001",
+  "createdAt": "2025-07-18T10:00:00Z",
+  "updatedAt": "2025-07-18T02:23:20.231Z",
+  "completed": false,
+  "priority": "high",
+  "tags": [
+    "bug",
+    "frontend"
+  ],
+  "order": 3,
+  "section": "week"
+}

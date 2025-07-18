@@ -6,7 +6,9 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  DragOverEvent,
   closestCenter,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -26,6 +28,44 @@ interface TodoListProps {
     sourceSection: string,
     destinationSection: string
   ) => void;
+}
+
+function SectionHeader({ 
+  sectionKey, 
+  title, 
+  count, 
+  isDragActive 
+}: { 
+  sectionKey: string; 
+  title: string; 
+  count: number; 
+  isDragActive: boolean;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: sectionKey,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+        isDragActive 
+          ? isOver 
+            ? 'bg-blue-200 border-2 border-blue-400' 
+            : 'bg-gray-200 border-2 border-dashed border-gray-400'
+          : 'bg-gray-100'
+      }`}
+    >
+      <h2 className="text-lg font-semibold text-gray-800">
+        {title} ({count})
+      </h2>
+      {isDragActive && (
+        <div className="text-sm text-gray-600">
+          {isOver ? 'ここにドロップ' : 'ドロップ可能'}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function TodoList({
@@ -107,14 +147,12 @@ export default function TodoList({
         {/* セクション表示 */}
         {Object.entries(sections).map(([sectionKey, section]) => (
           <div key={sectionKey} className="space-y-4">
-            <div
-              id={sectionKey}
-              className="flex items-center justify-between p-4 bg-gray-100 rounded-lg"
-            >
-              <h2 className="text-lg font-semibold text-gray-800">
-                {section.title} ({section.todos.length})
-              </h2>
-            </div>
+            <SectionHeader
+              sectionKey={sectionKey}
+              title={section.title}
+              count={section.todos.length}
+              isDragActive={!!activeId}
+            />
 
             <SortableContext
               items={section.todos.map(t => t.meta.id)}

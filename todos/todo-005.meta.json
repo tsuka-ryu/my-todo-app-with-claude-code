@@ -1,10 +1,13 @@
 {
   "id": "todo-005",
   "createdAt": "2025-07-18T11:30:00Z",
-  "updatedAt": "2025-07-18T11:30:00Z",
+  "updatedAt": "2025-07-18T02:23:18.072Z",
   "completed": false,
   "priority": "medium",
-  "tags": ["code-quality", "review"],
-  "order": 5,
+  "tags": [
+    "code-quality",
+    "review"
+  ],
+  "order": 1,
   "section": "today"
 }

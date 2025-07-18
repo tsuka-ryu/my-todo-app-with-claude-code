@@ -1,0 +1,13 @@
+{
+  "id": "todo-006",
+  "createdAt": "2025-07-18T12:00:00Z",
+  "updatedAt": "2025-07-18T02:23:18.073Z",
+  "completed": false,
+  "priority": "low",
+  "tags": [
+    "documentation",
+    "writing"
+  ],
+  "order": 2,
+  "section": "today"
+}
