@@ -3,9 +3,14 @@
   "title": "新しいプログラミング言語の学習",
   "completed": false,
   "priority": "low",
-  "tags": ["学習", "プログラミング", "Rust"],
+  "tags": [
+    "学習",
+    "プログラミング",
+    "Rust"
+  ],
   "createdAt": "2025-01-18T12:00:00.000Z",
-  "updatedAt": "2025-01-18T12:00:00.000Z",
+  "updatedAt": "2025-07-18T11:29:19.905Z",
   "section": "longterm",
-  "order": 1
+  "order": 1,
+  "content": "# 新しいプログラミング言語の学習\n\nRustプログラミング言語の基礎を学習する。\n\n## 学習計画\n\n### 基礎編（1-2週間）\n\n-   所有権システムの理解\n    \n-   基本的なデータ型と制御構造\n    \n-   関数とモジュール\n    \n\n### 応用編（3-4週間）\n\n-   エラーハンドリング\n    \n-   ジェネリクスとトレイト\n    \n-   並行プログラミング\n    \n\n### 実践編（5-8週間）\n\n-   小さなプロジェクトの作成\n    \n-   既存のクレートの活用\n    \n-   テストの書き方\n    \n\n## 参考資料\n\n-   The Rust Programming Language（公式ドキュメント）\n    \n-   Rust by Example\n    \n-   オンラインコース"
 }

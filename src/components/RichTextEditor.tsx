@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useEffect, useState } from 'react';
 import { prepareContentForEditor, prepareContentForStorage } from '@/lib/markdown';
+import { markdownInputHandler } from '@/lib/markdownInputHandler';
 
 interface RichTextEditorProps {
   content: string;
@@ -33,6 +34,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
       attributes: {
         class: 'prose prose-sm max-w-none focus:outline-none p-3 min-h-[500px] dark:prose-invert text-gray-900 dark:text-gray-100',
       },
+      handleKeyDown: markdownInputHandler,
     },
   });
 
@@ -148,7 +150,16 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
       </div>
       
       {/* エディター */}
-      <EditorContent editor={editor} />
+      <div 
+        data-tiptap-editor 
+        ref={(el) => { 
+          if (el && editor) {
+            (el as unknown as { __tiptapEditor: typeof editor }).__tiptapEditor = editor;
+          }
+        }}
+      >
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }
