@@ -70,12 +70,16 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
       </div>
 
       {/* チェックボックス */}
-      <input
-        type="checkbox"
-        checked={todo.meta.completed}
-        onChange={toggleCompleted}
-        className="rounded"
-      />
+      <button
+        onClick={toggleCompleted}
+        className="flex-shrink-0 w-5 h-5 rounded border-2 border-gray-300 hover:border-blue-500 transition-colors flex items-center justify-center"
+      >
+        {todo.meta.completed && (
+          <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+        )}
+      </button>
 
       {/* 優先度インジケーター */}
       <div
@@ -102,12 +106,18 @@ export default function TodoItem({ todo, onUpdate, onDelete, onClick }: TodoItem
         </span>
       )}
 
-      {/* 更新日 */}
+      {/* 期限日 */}
       <span className="text-xs text-gray-500 hidden sm:block">
-        {new Date(todo.meta.updatedAt).toLocaleDateString('ja-JP', {
-          month: 'short',
-          day: 'numeric'
-        })}
+        {todo.meta.dueDate ? 
+          new Date(todo.meta.dueDate).toLocaleDateString('ja-JP', {
+            month: 'short',
+            day: 'numeric'
+          }) :
+          new Date(todo.meta.updatedAt).toLocaleDateString('ja-JP', {
+            month: 'short',
+            day: 'numeric'
+          })
+        }
       </span>
 
       {/* 削除ボタン */}

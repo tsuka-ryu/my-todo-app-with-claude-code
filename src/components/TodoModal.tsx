@@ -63,9 +63,21 @@ export default function TodoModal({
   const priorityLabels = { high: '高', medium: '中', low: '低' };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
+    <>
+      {/* オーバーレイ */}
+      <div 
+        className={`fixed inset-0 transition-opacity duration-300 z-40 ${
+          isOpen ? '' : 'pointer-events-none'
+        }`}
+        onClick={onClose}
+      />
+      
+      {/* サイドパネル */}
+      <div className={`fixed top-0 right-0 h-full w-[70vw] bg-white shadow-xl transform transition-all duration-700 ease-out z-50 ${
+        isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+      }`}>
+        <div className="h-full overflow-y-auto">
+          <div className="p-6">
           {/* ヘッダー */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -197,8 +209,9 @@ export default function TodoModal({
               削除
             </button>
           </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

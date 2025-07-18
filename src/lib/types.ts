@@ -7,6 +7,7 @@ export interface TodoMeta {
   tags: string[];
   order: number;
   section: 'today' | 'week' | 'longterm';
+  dueDate?: string;
 }
 
 export interface Todo {
@@ -19,6 +20,7 @@ export interface CreateTodoRequest {
   priority?: 'high' | 'medium' | 'low';
   tags?: string[];
   section?: 'today' | 'week' | 'longterm';
+  dueDate?: string;
 }
 
 export interface UpdateTodoRequest {
@@ -27,6 +29,7 @@ export interface UpdateTodoRequest {
   priority?: 'high' | 'medium' | 'low';
   tags?: string[];
   section?: 'today' | 'week' | 'longterm';
+  dueDate?: string;
 }
 
 export interface ReorderRequest {
