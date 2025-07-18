@@ -1,0 +1,11 @@
+{
+  "id": "sample-2",
+  "title": "チームミーティングの準備",
+  "completed": false,
+  "priority": "medium",
+  "tags": ["ミーティング", "チーム", "準備"],
+  "createdAt": "2025-01-18T11:00:00.000Z",
+  "updatedAt": "2025-01-18T11:00:00.000Z",
+  "section": "week",
+  "order": 1
+}

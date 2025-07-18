@@ -1,0 +1,11 @@
+{
+  "id": "sample-3",
+  "title": "新しいプログラミング言語の学習",
+  "completed": false,
+  "priority": "low",
+  "tags": ["学習", "プログラミング", "Rust"],
+  "createdAt": "2025-01-18T12:00:00.000Z",
+  "updatedAt": "2025-01-18T12:00:00.000Z",
+  "section": "longterm",
+  "order": 1
+}
