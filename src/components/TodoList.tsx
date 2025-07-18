@@ -56,7 +56,7 @@ function SectionHeader({
           : 'bg-gray-100 dark:bg-gray-800'
       }`}
     >
-      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+      <h2 className="text-base font-medium text-gray-700 dark:text-gray-300">
         {title} ({count})
       </h2>
       {isDragActive && (

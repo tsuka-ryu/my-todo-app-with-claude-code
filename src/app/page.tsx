@@ -61,9 +61,15 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <header className="mb-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">TODO管理</h1>
-              <p className="text-gray-600 dark:text-gray-400">マークダウンベースのTODO管理システム</p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">TODO管理</h1>
+              </div>
             </div>
             <div className="flex gap-3">
               <button
