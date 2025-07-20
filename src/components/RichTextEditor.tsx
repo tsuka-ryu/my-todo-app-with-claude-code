@@ -16,7 +16,13 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
 
   const editor = useMemo(() => {
     return BlockNoteEditor.create({
-      initialContent: [],
+      initialContent: [
+        {
+          id: "initial",
+          type: "paragraph",
+          content: "",
+        },
+      ],
     });
   }, []);
 
@@ -28,11 +34,23 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           const blocks = await editor.tryParseMarkdownToBlocks(content);
           editor.replaceBlocks(editor.document, blocks);
         } else {
-          editor.replaceBlocks(editor.document, []);
+          // Use the initial block instead of empty array
+          const initialBlock = {
+            id: "initial",
+            type: "paragraph",
+            content: "",
+          };
+          editor.replaceBlocks(editor.document, [initialBlock]);
         }
       } catch (error) {
         console.error('Content conversion failed:', error);
-        editor.replaceBlocks(editor.document, []);
+        // Use the initial block instead of empty array
+        const initialBlock = {
+          id: "initial",
+          type: "paragraph", 
+          content: "",
+        };
+        editor.replaceBlocks(editor.document, [initialBlock]);
       } finally {
         setIsLoading(false);
       }
