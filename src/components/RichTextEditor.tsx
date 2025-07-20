@@ -59,7 +59,7 @@ export default function RichTextEditor({
   useEffect(() => {
     const timer = setTimeout(() => {
       onChange(localContent);
-    }, 500);
+    }, 30000);
 
     return () => clearTimeout(timer);
   }, [localContent, onChange]);

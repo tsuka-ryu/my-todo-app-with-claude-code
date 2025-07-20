@@ -80,7 +80,7 @@ export default function TodoModal({
 
     const timer = setTimeout(() => {
       autoSave();
-    }, 1000); // 1秒後に自動保存
+    }, 30000); // 30秒後に自動保存
 
     return () => clearTimeout(timer);
   }, [autoSave, todo]);
@@ -88,6 +88,19 @@ export default function TodoModal({
   if (!isOpen || !todo) return null;
 
   // resetEditState関数は自動保存機能により不要になったため削除
+
+  const handleClose = () => {
+    if (todo) {
+      onUpdate(todo.meta.id, {
+        title: editTitle,
+        content: editContent,
+        priority: editPriority,
+        tags: editTags,
+        dueDate: editDueDate || undefined,
+      });
+    }
+    onClose();
+  };
 
   const handleDelete = () => {
     if (confirm("このTODOを削除しますか？")) {
@@ -122,7 +135,7 @@ export default function TodoModal({
         className={`fixed inset-0 transition-opacity duration-300 z-40 ${
           isOpen ? "" : "pointer-events-none"
         }`}
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* サイドパネル */}
@@ -190,7 +203,7 @@ export default function TodoModal({
                   </svg>
                 </button>
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                   title="閉じる"
                 >
