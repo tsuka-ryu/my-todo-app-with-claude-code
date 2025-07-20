@@ -14,6 +14,7 @@ interface RichTextEditorProps {
 export default function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [localContent, setLocalContent] = useState(content);
 
   useEffect(() => {
     const checkDarkMode = () => {
@@ -43,15 +44,19 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
   const handleContentChange = useCallback(async (editor: BlockNoteEditor) => {
     try {
       const markdown = await editor.blocksToMarkdownLossy(editor.document);
-      onChange(markdown);
+      setLocalContent(markdown);
     } catch (error) {
       console.error('Failed to convert to markdown:', error);
     }
-  }, [onChange]);
+  }, []);
 
   const editor = useMemo(() => {
     return BlockNoteEditor.create();
   }, []);
+
+  useEffect(() => {
+    setLocalContent(content);
+  }, [content]);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -72,6 +77,14 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
 
     loadContent();
   }, [content, editor]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onChange(localContent);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [localContent, onChange]);
 
 
   if (isLoading) {
