@@ -114,7 +114,33 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
   }
 
   return (
-    <div className="min-h-[550px]">
+    <div 
+      className="min-h-[550px]"
+      style={{
+        '--editor-text-color': isDarkMode ? '#e5e7eb' : '#111827'
+      } as React.CSSProperties}
+    >
+      <style jsx>{`
+        :global([data-theming-css-variables-demo] .bn-editor),
+        :global([data-theming-css-variables-demo] .bn-block-outer),
+        :global([data-theming-css-variables-demo] .bn-block-content),
+        :global([data-theming-css-variables-demo] .bn-block),
+        :global(.dark [data-theming-css-variables-demo] .bn-editor),
+        :global(.dark [data-theming-css-variables-demo] .bn-block-outer),
+        :global(.dark [data-theming-css-variables-demo] .bn-block-content),
+        :global(.dark [data-theming-css-variables-demo] .bn-block) {
+          background-color: transparent !important;
+        }
+        :global([data-theming-css-variables-demo] .bn-editor *) {
+          color: var(--editor-text-color) !important;
+        }
+        :global([data-theming-css-variables-demo] .bn-inline-content *) {
+          color: var(--editor-text-color) !important;
+        }
+        :global([data-theming-css-variables-demo] .ProseMirror *) {
+          color: var(--editor-text-color) !important;
+        }
+      `}</style>
       <BlockNoteView 
         editor={editor} 
         theme={isDarkMode ? "dark" : "light"}
