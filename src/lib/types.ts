@@ -9,6 +9,7 @@ export interface TodoMeta {
   order: number;
   section: 'today' | 'week' | 'longterm';
   dueDate?: string;
+  slug?: string;
 }
 
 export interface Todo {
@@ -33,11 +34,11 @@ export interface UpdateTodoRequest {
   tags?: string[];
   section?: 'today' | 'week' | 'longterm';
   dueDate?: string;
+  order?: number;
 }
 
 export interface ReorderRequest {
-  sourceIndex: number;
-  destinationIndex: number;
-  sourceSection: string;
-  destinationSection: string;
+  sourceId: string;
+  destinationId: string | null;
+  section: string;
 }

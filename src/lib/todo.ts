@@ -2,7 +2,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import type { Todo, TodoMeta, CreateTodoRequest, UpdateTodoRequest } from './types';
-import { prepareContentForStorage } from './markdown';
 import { 
   generateFilenameFromTitle, 
   generateUniqueFilenameCandidates, 
@@ -217,8 +216,8 @@ export async function createTodo(request: CreateTodoRequest): Promise<Todo> {
   const metaPath = path.join(TODOS_DIR, `${filename}.meta.json`);
   const mdPath = path.join(TODOS_DIR, `${filename}.md`);
   
-  // コンテンツをマークダウン形式で保存
-  const markdownContent = prepareContentForStorage(request.content);
+  // コンテンツをそのまま保存（BlockNoteが既にマークダウン形式で提供）
+  const markdownContent = request.content;
   
   await Promise.all([
     fs.writeFile(metaPath, JSON.stringify(meta, null, 2)),
@@ -248,8 +247,8 @@ export async function updateTodo(id: string, request: UpdateTodoRequest): Promis
   
   const updatedContent = request.content !== undefined ? request.content : existingTodo.content;
   
-  // コンテンツをマークダウン形式で保存
-  const markdownContent = prepareContentForStorage(updatedContent);
+  // コンテンツをそのまま保存（BlockNoteが既にマークダウン形式で提供）
+  const markdownContent = updatedContent;
   
   if (titleChanged && newFilename) {
     // 古いファイルを探す

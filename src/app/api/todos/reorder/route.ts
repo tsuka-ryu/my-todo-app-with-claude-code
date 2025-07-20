@@ -6,14 +6,13 @@ export async function PATCH(request: NextRequest) {
   try {
     const body: ReorderRequest = await request.json();
     
-    const todos = await reorderTodos(
-      body.sourceIndex,
-      body.destinationIndex,
-      body.sourceSection,
-      body.destinationSection
+    await reorderTodos(
+      body.sourceId,
+      body.destinationId,
+      body.section
     );
     
-    return NextResponse.json(todos);
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error reordering todos:', error);
     return NextResponse.json({ error: 'Failed to reorder todos' }, { status: 500 });

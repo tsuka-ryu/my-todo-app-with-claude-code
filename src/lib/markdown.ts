@@ -78,13 +78,13 @@ function basicHtmlToMarkdown(html: string): string {
     .replace(/<strike[^>]*>(.*?)<\/strike>/gi, '~~$1~~')
     
     // リスト
-    .replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
+    .replace(/<ul[^>]*>(.*?)<\/ul>/gi, (match, content) => {
       const items = content.match(/<li[^>]*>(.*?)<\/li>/gi) || [];
       return items.map((item: string) => 
         '- ' + item.replace(/<li[^>]*>(.*?)<\/li>/gi, '$1').trim()
       ).join('\n') + '\n\n';
     })
-    .replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
+    .replace(/<ol[^>]*>(.*?)<\/ol>/gi, (match, content) => {
       const items = content.match(/<li[^>]*>(.*?)<\/li>/gi) || [];
       return items.map((item: string, index: number) => 
         `${index + 1}. ` + item.replace(/<li[^>]*>(.*?)<\/li>/gi, '$1').trim()
