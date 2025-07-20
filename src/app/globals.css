@@ -93,12 +93,3 @@ body {
   color: #ffffff !important;
 }
 
-/* TipTap editor specific styles */
-.ProseMirror {
-  outline: none;
-  color: inherit;
-}
-
-.dark .ProseMirror {
-  color: #f3f4f6;
-}

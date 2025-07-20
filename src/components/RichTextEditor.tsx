@@ -28,7 +28,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
       initialContent: [
         {
           id: "initial",
-          type: "paragraph",
+          type: "paragraph" as const,
           content: "",
         },
       ],
@@ -48,7 +48,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
             // Fallback to initial block if parsing fails
             const initialBlock = {
               id: "initial",
-              type: "paragraph",
+              type: "paragraph" as const,
               content: "",
             };
             editor.replaceBlocks(editor.document, [initialBlock]);
@@ -57,7 +57,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           // For empty content, use initial empty paragraph
           const initialBlock = {
             id: "initial", 
-            type: "paragraph",
+            type: "paragraph" as const,
             content: "",
           };
           editor.replaceBlocks(editor.document, [initialBlock]);
@@ -67,7 +67,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
         // Always fallback to a safe initial state
         const initialBlock = {
           id: "initial",
-          type: "paragraph", 
+          type: "paragraph" as const, 
           content: "",
         };
         editor.replaceBlocks(editor.document, [initialBlock]);
