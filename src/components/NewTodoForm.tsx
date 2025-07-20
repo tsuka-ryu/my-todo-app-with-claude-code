@@ -1,23 +1,31 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { CreateTodoRequest } from '@/lib/types';
-import RichTextEditor from './RichTextEditor';
-import TagSelector from './TagSelector';
+import { useState } from "react";
+import type { CreateTodoRequest } from "@/lib/types";
+import RichTextEditor from "./RichTextEditor";
+import TagSelector from "./TagSelector";
 
 interface NewTodoFormProps {
   onCreate: (request: CreateTodoRequest) => void;
   onCancel: () => void;
   allTags?: string[];
+  isDarkMode?: boolean;
 }
 
-export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTodoFormProps) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [section, setSection] = useState<'today' | 'week' | 'longterm'>('today');
-  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
+export default function NewTodoForm({
+  onCreate,
+  onCancel,
+  allTags = [],
+  isDarkMode = false,
+}: NewTodoFormProps) {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [section, setSection] = useState<"today" | "week" | "longterm">(
+    "today"
+  );
+  const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
   const [tags, setTags] = useState<string[]>([]);
-  const [dueDate, setDueDate] = useState('');
+  const [dueDate, setDueDate] = useState("");
 
   const handleSubmit = () => {
     if (title.trim()) {
@@ -29,18 +37,20 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
         tags,
         dueDate: dueDate || undefined,
       });
-      setTitle('');
-      setContent('');
+      setTitle("");
+      setContent("");
       setTags([]);
-      setDueDate('');
+      setDueDate("");
       onCancel();
     }
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">新しいTODOを追加</h3>
-      
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        新しいTODOを追加
+      </h3>
+
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -55,8 +65,7 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
             autoFocus
           />
         </div>
-        
-        
+
         {/* コンパクトなメタ情報エリア */}
         <div className="flex flex-wrap gap-2 items-end">
           <div className="flex-shrink-0">
@@ -65,7 +74,9 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
             </label>
             <select
               value={section}
-              onChange={(e) => setSection(e.target.value as 'today' | 'week' | 'longterm')}
+              onChange={(e) =>
+                setSection(e.target.value as "today" | "week" | "longterm")
+              }
               className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="today">今日やる</option>
@@ -79,7 +90,9 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
             </label>
             <select
               value={priority}
-              onChange={(e) => setPriority(e.target.value as 'high' | 'medium' | 'low')}
+              onChange={(e) =>
+                setPriority(e.target.value as "high" | "medium" | "low")
+              }
               className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="low">低</option>
@@ -118,6 +131,7 @@ export default function NewTodoForm({ onCreate, onCancel, allTags = [] }: NewTod
           <RichTextEditor
             content={content}
             onChange={setContent}
+            isDarkMode={isDarkMode}
           />
         </div>
 

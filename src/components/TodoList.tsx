@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -8,14 +8,14 @@ import {
   DragStartEvent,
   closestCenter,
   useDroppable,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import TodoItem from './TodoItem';
-import TodoModal from './TodoModal';
-import type { Todo, UpdateTodoRequest } from '@/lib/types';
+} from "@dnd-kit/sortable";
+import TodoItem from "./TodoItem";
+import TodoModal from "./TodoModal";
+import type { Todo, UpdateTodoRequest } from "@/lib/types";
 
 interface TodoListProps {
   todos: Todo[];
@@ -28,17 +28,18 @@ interface TodoListProps {
     destinationSection: string
   ) => void;
   allTags?: string[];
+  isDarkMode?: boolean;
 }
 
-function SectionHeader({ 
-  sectionKey, 
-  title, 
-  count, 
-  isDragActive 
-}: { 
-  sectionKey: string; 
-  title: string; 
-  count: number; 
+function SectionHeader({
+  sectionKey,
+  title,
+  count,
+  isDragActive,
+}: {
+  sectionKey: string;
+  title: string;
+  count: number;
   isDragActive: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -49,11 +50,11 @@ function SectionHeader({
     <div
       ref={setNodeRef}
       className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
-        isDragActive 
-          ? isOver 
-            ? 'bg-blue-200 dark:bg-blue-800 border-2 border-blue-400 dark:border-blue-600' 
-            : 'bg-gray-200 dark:bg-gray-700 border-2 border-dashed border-gray-400 dark:border-gray-600'
-          : 'bg-gray-100 dark:bg-gray-800'
+        isDragActive
+          ? isOver
+            ? "bg-blue-200 dark:bg-blue-800 border-2 border-blue-400 dark:border-blue-600"
+            : "bg-gray-200 dark:bg-gray-700 border-2 border-dashed border-gray-400 dark:border-gray-600"
+          : "bg-gray-100 dark:bg-gray-800"
       }`}
     >
       <h2 className="text-base font-medium text-gray-700 dark:text-gray-300">
@@ -61,7 +62,7 @@ function SectionHeader({
       </h2>
       {isDragActive && (
         <div className="text-sm text-gray-600 dark:text-gray-300">
-          {isOver ? 'ここにドロップ' : 'ドロップ可能'}
+          {isOver ? "ここにドロップ" : "ドロップ可能"}
         </div>
       )}
     </div>
@@ -74,15 +75,25 @@ export default function TodoList({
   onDelete,
   onReorder,
   allTags = [],
+  isDarkMode = false,
 }: TodoListProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   const sections = {
-    today: { title: '今日やる', todos: todos.filter(t => t.meta.section === 'today') },
-    week: { title: '今週やる', todos: todos.filter(t => t.meta.section === 'week') },
-    longterm: { title: '長期', todos: todos.filter(t => t.meta.section === 'longterm') },
+    today: {
+      title: "今日やる",
+      todos: todos.filter((t) => t.meta.section === "today"),
+    },
+    week: {
+      title: "今週やる",
+      todos: todos.filter((t) => t.meta.section === "week"),
+    },
+    longterm: {
+      title: "長期",
+      todos: todos.filter((t) => t.meta.section === "longterm"),
+    },
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -100,9 +111,9 @@ export default function TodoList({
 
     // セクションの特定
     const getSection = (id: string) => {
-      if (id === 'today' || id === 'week' || id === 'longterm') return id;
-      const todo = todos.find(t => t.meta.id === id);
-      return todo?.meta.section || 'today';
+      if (id === "today" || id === "week" || id === "longterm") return id;
+      const todo = todos.find((t) => t.meta.id === id);
+      return todo?.meta.section || "today";
     };
 
     const activeSection = getSection(activeId);
@@ -114,17 +125,16 @@ export default function TodoList({
     const activeTodos = sections[activeSection as keyof typeof sections].todos;
     const overTodos = sections[overSection as keyof typeof sections].todos;
 
-    const activeIndex = activeTodos.findIndex(t => t.meta.id === activeId);
-    let overIndex = overTodos.findIndex(t => t.meta.id === overId);
+    const activeIndex = activeTodos.findIndex((t) => t.meta.id === activeId);
+    let overIndex = overTodos.findIndex((t) => t.meta.id === overId);
 
     // セクションヘッダーにドロップした場合
-    if (overId === 'today' || overId === 'week' || overId === 'longterm') {
+    if (overId === "today" || overId === "week" || overId === "longterm") {
       overIndex = overTodos.length;
     }
 
     onReorder(activeIndex, overIndex, activeSection, overSection);
   };
-
 
   const handleTodoClick = (todo: Todo) => {
     setSelectedTodo(todo);
@@ -136,7 +146,9 @@ export default function TodoList({
     setSelectedTodo(null);
   };
 
-  const activeTodo = activeId ? todos.find(t => t.meta.id === activeId) : null;
+  const activeTodo = activeId
+    ? todos.find((t) => t.meta.id === activeId)
+    : null;
 
   return (
     <DndContext
@@ -156,11 +168,11 @@ export default function TodoList({
             />
 
             <SortableContext
-              items={section.todos.map(t => t.meta.id)}
+              items={section.todos.map((t) => t.meta.id)}
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-2">
-                {section.todos.map(todo => (
+                {section.todos.map((todo) => (
                   <TodoItem
                     key={todo.meta.id}
                     todo={todo}
@@ -198,6 +210,7 @@ export default function TodoList({
         onUpdate={onUpdate}
         onDelete={onDelete}
         allTags={allTags}
+        isDarkMode={isDarkMode}
       />
     </DndContext>
   );

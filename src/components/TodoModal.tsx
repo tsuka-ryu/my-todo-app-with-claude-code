@@ -12,6 +12,7 @@ interface TodoModalProps {
   onUpdate: (id: string, request: UpdateTodoRequest) => void;
   onDelete: (id: string) => void;
   allTags?: string[];
+  isDarkMode?: boolean;
 }
 
 export default function TodoModal({
@@ -21,6 +22,7 @@ export default function TodoModal({
   onUpdate,
   onDelete,
   allTags = [],
+  isDarkMode = false,
 }: TodoModalProps) {
   // 常にWYSIWYG編集モードにするため、isEditingステートを削除
   const [editTitle, setEditTitle] = useState("");
@@ -309,6 +311,7 @@ export default function TodoModal({
                   <RichTextEditor
                     content={editContent}
                     onChange={setEditContent}
+                    isDarkMode={isDarkMode}
                   />
                 ) : (
                   <div className="text-gray-500 dark:text-gray-400">

@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
-import { useDarkMode } from "@/hooks/useDarkMode";
 import "@blocknote/react/style.css";
 import "@blocknote/mantine/style.css";
 import styles from "./RichTextEditor.module.css";
@@ -11,15 +10,16 @@ import styles from "./RichTextEditor.module.css";
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
+  isDarkMode?: boolean;
 }
 
 export default function RichTextEditor({
   content,
   onChange,
+  isDarkMode = false,
 }: RichTextEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [localContent, setLocalContent] = useState(content);
-  const { isDarkMode } = useDarkMode();
 
   const editor = useCreateBlockNote();
 
