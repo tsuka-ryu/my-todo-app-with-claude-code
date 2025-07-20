@@ -1,0 +1,39 @@
+/* BlockNote エディタのテーマカスタマイズ */
+.editor {
+  --bn-colors-editor-text: var(--editor-text-color);
+  --bn-colors-editor-background: transparent;
+  --bn-colors-menu-text: var(--editor-text-color);
+  --bn-colors-menu-background: transparent;
+  --bn-colors-tooltip-text: var(--editor-text-color);
+  --bn-colors-tooltip-background: var(--editor-bg-color, white);
+  --bn-colors-hovered-text: var(--editor-text-color);
+  --bn-colors-selected-text: var(--editor-text-color);
+}
+
+.editor[data-theme="light"] {
+  --editor-text-color: #111827; /* text-gray-900 */
+  --editor-bg-color: white;
+}
+
+.editor[data-theme="dark"] {
+  --editor-text-color: #f3f4f6; /* text-gray-100 */
+  --editor-bg-color: #1f2937; /* bg-gray-800 */
+}
+
+/* さらに強制的に適用 */
+.editor :global(.bn-editor) {
+  color: var(--editor-text-color) !important;
+  background-color: transparent !important;
+}
+
+.editor :global(.bn-editor *) {
+  color: var(--editor-text-color) !important;
+}
+
+.editor :global(.ProseMirror) {
+  color: var(--editor-text-color) !important;
+}
+
+.editor :global(.ProseMirror *) {
+  color: var(--editor-text-color) !important;
+}

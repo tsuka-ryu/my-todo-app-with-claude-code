@@ -1,58 +1,36 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { BlockNoteEditor } from '@blocknote/core';
-import { BlockNoteView } from '@blocknote/mantine';
-import '@blocknote/react/style.css';
-import '@blocknote/mantine/style.css';
+import { useEffect, useState, useCallback } from "react";
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/mantine";
+import { useDarkMode } from "@/hooks/useDarkMode";
+import "@blocknote/react/style.css";
+import "@blocknote/mantine/style.css";
+import styles from "./RichTextEditor.module.css";
 
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
 }
 
-export default function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+export default function RichTextEditor({
+  content,
+  onChange,
+}: RichTextEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [localContent, setLocalContent] = useState(content);
+  const { isDarkMode } = useDarkMode();
 
-  useEffect(() => {
-    const checkDarkMode = () => {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches ||
-        document.documentElement.classList.contains('dark');
-      console.log('RichTextEditor isDark:', isDark);
-      setIsDarkMode(isDark);
-    };
+  const editor = useCreateBlockNote();
 
-    checkDarkMode();
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const observer = new MutationObserver(checkDarkMode);
-    
-    mediaQuery.addEventListener('change', checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    return () => {
-      mediaQuery.removeEventListener('change', checkDarkMode);
-      observer.disconnect();
-    };
-  }, []);
-
-  const handleContentChange = useCallback(async (editor: BlockNoteEditor) => {
+  const handleContentChange = useCallback(async () => {
     try {
       const markdown = await editor.blocksToMarkdownLossy(editor.document);
       setLocalContent(markdown);
     } catch (error) {
-      console.error('Failed to convert to markdown:', error);
+      console.error("Failed to convert to markdown:", error);
     }
-  }, []);
-
-  const editor = useMemo(() => {
-    return BlockNoteEditor.create();
-  }, []);
+  }, [editor]);
 
   useEffect(() => {
     setLocalContent(content);
@@ -69,7 +47,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           }
         }
       } catch (error) {
-        console.error('Content loading failed:', error);
+        console.error("Content loading failed:", error);
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +64,6 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
     return () => clearTimeout(timer);
   }, [localContent, onChange]);
 
-
   if (isLoading) {
     return (
       <div className="min-h-[550px] flex items-center justify-center">
@@ -96,38 +73,13 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
   }
 
   return (
-    <div 
-      className="min-h-[550px]"
-      style={{
-        '--editor-text-color': isDarkMode ? '#e5e7eb' : '#000000'
-      } as React.CSSProperties}
-      data-dark-mode={isDarkMode}
+    <div
+      className={`min-h-[550px] ${styles.editor}`}
+      data-theme={isDarkMode ? "dark" : "light"}
     >
-      <style jsx>{`
-        :global([data-theming-css-variables-demo] .bn-editor),
-        :global([data-theming-css-variables-demo] .bn-block-outer),
-        :global([data-theming-css-variables-demo] .bn-block-content),
-        :global([data-theming-css-variables-demo] .bn-block),
-        :global(.dark [data-theming-css-variables-demo] .bn-editor),
-        :global(.dark [data-theming-css-variables-demo] .bn-block-outer),
-        :global(.dark [data-theming-css-variables-demo] .bn-block-content),
-        :global(.dark [data-theming-css-variables-demo] .bn-block) {
-          background-color: transparent !important;
-        }
-        :global([data-theming-css-variables-demo] .bn-editor *) {
-          color: var(--editor-text-color) !important;
-        }
-        :global([data-theming-css-variables-demo] .bn-inline-content *) {
-          color: var(--editor-text-color) !important;
-        }
-        :global([data-theming-css-variables-demo] .ProseMirror *) {
-          color: var(--editor-text-color) !important;
-        }
-      `}</style>
-      <BlockNoteView 
-        editor={editor} 
+      <BlockNoteView
+        editor={editor}
         theme={isDarkMode ? "dark" : "light"}
-        data-theming-css-variables-demo
         onChange={handleContentChange}
       />
     </div>
