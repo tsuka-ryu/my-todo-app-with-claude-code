@@ -19,6 +19,8 @@ export default function RichTextEditor({
   isDarkMode = false,
 }: RichTextEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
+  // TODO: localContentは多分不要で、親から受け取ったcontentとonChangeで十分のはず
+  // ただレンダリングサイクルがおかしいので、処理を整理すること
   const [localContent, setLocalContent] = useState(content);
 
   const editor = useCreateBlockNote();
