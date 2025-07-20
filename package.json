@@ -8,6 +8,8 @@
     "start": "next start --port 3333",
     "lint": "next lint",
     "lint:md": "markdownlint \"**/*.md\" --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "lefthook install",
     "clean:todos": "node scripts/clean-todos.js"
   },
@@ -36,6 +38,7 @@
     "lefthook": "^1.12.2",
     "markdownlint": "^0.38.0",
     "markdownlint-cli": "^0.45.0",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

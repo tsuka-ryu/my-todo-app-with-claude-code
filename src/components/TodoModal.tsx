@@ -305,10 +305,16 @@ export default function TodoModal({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   詳細内容
                 </label>
-                <RichTextEditor
-                  content={editContent}
-                  onChange={setEditContent}
-                />
+                {!!editContent ? (
+                  <RichTextEditor
+                    content={editContent}
+                    onChange={setEditContent}
+                  />
+                ) : (
+                  <div className="text-gray-500 dark:text-gray-400">
+                    コンテンツがありません
+                  </div>
+                )}
               </div>
             </div>
 
