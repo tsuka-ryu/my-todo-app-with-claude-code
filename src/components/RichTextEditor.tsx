@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { BlockNoteEditor } from '@blocknote/core';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/react/style.css';
@@ -13,6 +13,15 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleContentChange = useCallback(async (editor: BlockNoteEditor) => {
+    try {
+      const markdown = await editor.blocksToMarkdownLossy(editor.document);
+      onChange(markdown);
+    } catch (error) {
+      console.error('Failed to convert to markdown:', error);
+    }
+  }, [onChange]);
 
   const editor = useMemo(() => {
     return BlockNoteEditor.create({
@@ -31,12 +40,23 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
       setIsLoading(true);
       try {
         if (content && content.trim()) {
+          // Parse markdown content to blocks
           const blocks = await editor.tryParseMarkdownToBlocks(content);
-          editor.replaceBlocks(editor.document, blocks);
+          if (blocks && blocks.length > 0) {
+            editor.replaceBlocks(editor.document, blocks);
+          } else {
+            // Fallback to initial block if parsing fails
+            const initialBlock = {
+              id: "initial",
+              type: "paragraph",
+              content: "",
+            };
+            editor.replaceBlocks(editor.document, [initialBlock]);
+          }
         } else {
-          // Use the initial block instead of empty array
+          // For empty content, use initial empty paragraph
           const initialBlock = {
-            id: "initial",
+            id: "initial", 
             type: "paragraph",
             content: "",
           };
@@ -44,7 +64,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
         }
       } catch (error) {
         console.error('Content conversion failed:', error);
-        // Use the initial block instead of empty array
+        // Always fallback to a safe initial state
         const initialBlock = {
           id: "initial",
           type: "paragraph", 
@@ -59,18 +79,6 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
     loadContent();
   }, [content, editor]);
 
-  useEffect(() => {
-    const handleChange = async () => {
-      try {
-        const markdown = await editor.blocksToMarkdownLossy(editor.document);
-        onChange(markdown);
-      } catch (error) {
-        console.error('Failed to convert to markdown:', error);
-      }
-    };
-
-    editor.onChange(handleChange);
-  }, [editor, onChange]);
 
   if (isLoading) {
     return (
@@ -86,6 +94,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
         editor={editor} 
         theme="light"
         data-theming-css-variables-demo
+        onChange={handleContentChange}
       />
     </div>
   );
