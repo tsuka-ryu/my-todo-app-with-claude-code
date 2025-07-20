@@ -13,6 +13,31 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches ||
+        document.documentElement.classList.contains('dark');
+      setIsDarkMode(isDark);
+    };
+
+    checkDarkMode();
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const observer = new MutationObserver(checkDarkMode);
+    
+    mediaQuery.addEventListener('change', checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => {
+      mediaQuery.removeEventListener('change', checkDarkMode);
+      observer.disconnect();
+    };
+  }, []);
 
   const handleContentChange = useCallback(async (editor: BlockNoteEditor) => {
     try {
@@ -82,17 +107,17 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
 
   if (isLoading) {
     return (
-      <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[550px] flex items-center justify-center">
+      <div className="min-h-[550px] flex items-center justify-center">
         <div className="text-gray-500 dark:text-gray-400">読み込み中...</div>
       </div>
     );
   }
 
   return (
-    <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[550px]">
+    <div className="min-h-[550px]">
       <BlockNoteView 
         editor={editor} 
-        theme="light"
+        theme={isDarkMode ? "dark" : "light"}
         data-theming-css-variables-demo
         onChange={handleContentChange}
       />
