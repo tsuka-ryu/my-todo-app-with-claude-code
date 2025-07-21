@@ -80,7 +80,7 @@ export default function TodoModal({
 
     const timer = setTimeout(() => {
       autoSave();
-    }, 30000); // 30秒後に自動保存
+    }, 10000); // 10秒後に自動保存
 
     return () => clearTimeout(timer);
   }, [autoSave, todo]);
