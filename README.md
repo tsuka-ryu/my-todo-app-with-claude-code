@@ -2,6 +2,8 @@
 
 シンプルなマークダウンベースのTODO管理アプリケーション
 
+https://github.com/user-attachments/assets/f9a39bef-f652-4a8d-8e78-1f3480be4373
+
 ## 使い方
 
 1. リポジトリをクローン
