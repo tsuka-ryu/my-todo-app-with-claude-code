@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/react/style.css";
@@ -19,28 +19,45 @@ export default function RichTextEditor({
   isDarkMode = false,
 }: RichTextEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
-  // TODO: localContentは多分不要で、親から受け取ったcontentとonChangeで十分のはず
-  // ただレンダリングサイクルがおかしいので、処理を整理すること
-  const [localContent, setLocalContent] = useState(content);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const editor = useCreateBlockNote();
 
+  // デバウンス関数
+  const debounce = useCallback((func: () => void, delay: number) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(func, delay);
+  }, []);
+
   const handleContentChange = useCallback(async () => {
+    debounce(async () => {
+      try {
+        const markdown = await editor.blocksToMarkdownLossy(editor.document);
+        onChange(markdown);
+      } catch (error) {
+        console.error("Failed to convert to markdown:", error);
+      }
+    }, 1000); // 1秒のデバウンス
+  }, [editor, onChange, debounce]);
+
+  // onBlur時に即座に保存
+  const handleBlur = useCallback(async () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     try {
       const markdown = await editor.blocksToMarkdownLossy(editor.document);
-      setLocalContent(markdown);
+      onChange(markdown);
     } catch (error) {
       console.error("Failed to convert to markdown:", error);
     }
-  }, [editor]);
+  }, [editor, onChange]);
 
-  useEffect(() => {
-    setLocalContent(content);
-  }, [content]);
-
+  // エディタの初期化
   useEffect(() => {
     const loadContent = async () => {
-      setIsLoading(true);
       try {
         if (content && content.trim()) {
           const blocks = await editor.tryParseMarkdownToBlocks(content);
@@ -56,15 +73,13 @@ export default function RichTextEditor({
     };
 
     loadContent();
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [content, editor]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onChange(localContent);
-    }, 30000);
-
-    return () => clearTimeout(timer);
-  }, [localContent, onChange]);
 
   if (isLoading) {
     return (
@@ -78,6 +93,7 @@ export default function RichTextEditor({
     <div
       className={`min-h-[550px] ${styles.editor}`}
       data-theme={isDarkMode ? "dark" : "light"}
+      onBlur={handleBlur}
     >
       <BlockNoteView
         editor={editor}
